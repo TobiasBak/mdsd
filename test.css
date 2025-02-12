@@ -1,0 +1,24 @@
+.mermaid .er.relationshipLabelBox {
+    fill: white;
+    border: 2px solid black;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    width: 1.5em; /* Scales relative to font size */
+    height: 1.5em; /* Scales relative to font size */
+}
+
+.mermaid .node rect {
+    fill: #f9f9f9;
+    stroke: #333;
+    stroke-width: 2px;
+}
+
+
+.mermaid .edgeLabel {
+    font-size: 12px;
+    fill: #333;
+}
+
+.mermaid .label {
+    font-size: 14px;
+    fill: #333;
+}
