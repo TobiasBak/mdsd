@@ -24,7 +24,7 @@
 grammar MiniLogo
 
 entry Model:
-    (entities+=Entity | relationship+=Relationship | multirelation+=MultiRelationShip | inheritance+=Inheritance | inheritanceType+=InheritanceType)*;
+    (relationshipidentifiers+=RelationShipIdentifiers | entities+=Entity | relationship+=Relationship | multirelation+=MultiRelationShip | inheritance+=Inheritance | inheritanceType+=InheritanceType)*;
 
 Entity:
     name=ID '(' (attributes+=Attribute (',' attributes+=Attribute)*)? ')';
@@ -32,8 +32,10 @@ Entity:
 Attribute:
     // Match for any amount of optional keywords, then find a name, 
     // and then any amount of optional keywors
-    (keywords+=KEYWORDS)* (name=ID) (keywords+=KEYWORDS)*
+    key=KEYWORDSKEYS? keywords+='Unique'? keywords+='Derived'? name=ID type=TYPES?
     ;
+
+
 
 Relationship:
 // Wo do entity=ID instead of entity=[Entity] becayse we want to overwrite
@@ -46,7 +48,7 @@ Relationship:
     // The content shows a red line, but that is only visual. The object contains the "is"
     // I tried replacing ('is' | 'from') with a terminal definition, but did not work
     identifier_as_string_array+=(ID | ('is' | 'from'))+  
-    ('(' (attributes+=Attribute (',' attributes+=Attribute)*)? ')')?
+    '(' (attributes+=Attribute (',' attributes+=Attribute)*)? ')'
     ;
 
 MultiRelationShip:
@@ -68,11 +70,15 @@ InheritanceType:
     'Inheritance' 'from' entity=ID 'is' (type='overlapping' | type='disjointed')
     ;
 
+RelationShipIdentifiers:
+    entity=ID 'is''identified' 'by' identifier+=(ID | ('is' | 'from'))+
+    ;
 
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 
 // THEREFORE ID SHOULD BE THE LAST MATCH TO BE CHEKCED
-terminal KEYWORDS:
-    ('PK' | 'FK' | 'string' | 'number');
+terminal KEYWORDSKEYS: 'PK' | 'FK';
+
+terminal TYPES: 'string' | 'number';
 
 terminal REL_RANGE_MULTI:
     RANGE_PATTERN '-' RANGE_PATTERN '-' RANGE_PATTERN (('-') RANGE_PATTERN)*;
