@@ -19,3 +19,6 @@ This requires that you create a file in the new editor. It does not automaticall
 
 If you want to run a .JH file you can run `node langium/er-dsl/bin/cli.js generate ../test.JH`
 
+
+## How to run webserver
+`npm run serve`
