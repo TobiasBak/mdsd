@@ -1,6 +1,6 @@
 import { type Module, inject } from 'langium';
 import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
-import { GoatJhGeneratedModule, GoatJhGeneratedSharedModule } from './generated/module.js';
+import { GoatJHGeneratedModule, GoatJhGeneratedSharedModule } from './generated/module.js';
 import { GoatJhValidator, registerValidationChecks } from './goat-jh-validator.js';
 
 /**
@@ -54,7 +54,7 @@ export function createGoatJhServices(context: DefaultSharedModuleContext): {
     );
     const GoatJh = inject(
         createDefaultModule({ shared }),
-        GoatJhGeneratedModule,
+        GoatJHGeneratedModule,
         GoatJhModule
     );
     shared.ServiceRegistry.register(GoatJh);
