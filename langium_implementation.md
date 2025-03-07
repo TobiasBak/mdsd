@@ -1,15 +1,15 @@
 
 # Todo based on syntax missing
-[x] Declaring entity    
-[ ] Declaring Relationship
-    [x] Terminal command for defining \*-\* / 1..2-1 / etc.
-    [ ] I am unsure if the range pattern is correct. 
-[ ] Deciding if string_array is a good enough substitute for multiple word strings
-[X] Inheritance
-[ ] MultiRelationships have no way to confirm that amount of entities relates to amount of relationships specified
-    [ ] Have no way to confirm that amount of entities relates to amount of relationships specified
-        [ ] I do no know if this is possible. 
-    [ ] Potentially should change relationships (\*-\*) to be as array instead of current implementation so backend does not have to do string.split xd
+- [x] Declaring entity    
+- [ ] Declaring Relationship
+   - [x] Terminal command for defining \*-\* / 1..2-1 / etc.
+   - [ ] I am unsure if the range pattern is correct. 
+- [ ] Deciding if string_array is a good enough substitute for multiple word strings
+- [X] Inheritance
+- [ ] MultiRelationships have no way to confirm that amount of entities relates to amount of relationships specified
+   - [ ] Have no way to confirm that amount of entities relates to amount of relationships specified
+       - I do no know if this is possible. 
+   - [ ] Potentially should change relationships (\*-\*) to be as array instead of current implementation so backend does not have to do string.split xd
  
 ### [Issue with using keywords as text](https://langium.org/docs/recipes/keywords-as-identifiers/)
 ### [Building a webbrowser with langium ](https://langium.org/docs/learn/minilogo/generation_in_the_web/)
@@ -21,7 +21,7 @@
 
 # Implemented syntax
 ```langium
-grammar MiniLogo
+grammar goatJH
 
 entry Model:
     (relationshipidentifiers+=RelationShipIdentifiers | entities+=Entity | relationship+=Relationship | multirelation+=MultiRelationShip | inheritance+=Inheritance | inheritanceType+=InheritanceType)*;
