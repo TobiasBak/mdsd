@@ -10,6 +10,7 @@
     "type": "module",
     "scripts": {
         "build": "tsc -b tsconfig.src.json && node esbuild.mjs",
+        "diagram": "npm run build && node ./bin/cli.js generate ",
         "watch": "concurrently -n tsc,esbuild -c blue,yellow \"tsc -b tsconfig.src.json --watch\" \"node esbuild.mjs --watch\"",
         "lint": "eslint src --ext ts",
         "langium:generate": "langium generate",

@@ -17,12 +17,12 @@ Entity:
 
 Attribute:
     // Match for any amount of optional keywords, then find a name, 
-    // and then any amount of optional keywors
+    // and then any amount of optional keywords
     keywords+=KEYWORDSKEYS? keywords+='Unique'? keywords+='Derived'? name=ID type=TYPES?
     ;
 
 Relationship:
-// Wo do entity=ID instead of entity=[Entity] becayse we want to overwrite
+// Wo do entity=ID instead of entity=[Entity] because we want to overwrite
 // and reference entities not defined yet.
     entities+=ID                
     (relationship=REL_RANGE)   
@@ -48,7 +48,7 @@ MultiRelationShip:
 
 Inheritance: 
     children+=ID (',' children+=ID)*
-    'inherents' 'from'
+    'inherits' 'from'
     parent=ID
     EOL*
     ;
@@ -64,7 +64,7 @@ RelationShipIdentifiers:
     ;
 
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 
-// THEREFORE ID SHOULD BE THE LAST MATCH TO BE CHEKCED
+// THEREFORE ID SHOULD BE THE LAST MATCH TO BE CHECKED
 terminal KEYWORDSKEYS: 'PK' | 'FK';
 
 terminal TYPES: 'string' | 'number';
