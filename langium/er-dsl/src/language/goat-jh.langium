@@ -105,7 +105,7 @@ fragment T3:
     keywords+=KEYWORDSKEYS?;
 
 fragment T5:
-    type+=TYPES?;
+    type=TYPES?;
 
 Relationship:
 // Wo do entity=ID instead of entity=[Entity] becayse we want to overwrite
