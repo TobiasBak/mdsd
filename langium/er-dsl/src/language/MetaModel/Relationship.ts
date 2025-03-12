@@ -3,6 +3,10 @@ import { RelationshipAttribute } from "./RelationshipAttribute.js";
 
 export type many = '*';
 
+export type side = "a" | "b";
+
+export type Cardinality = number | many;
+
 export type RelationshipConnection = {
     entity: Entity;
     lower_cardinality: number | many;
@@ -23,6 +27,22 @@ export class Relationship {
         this.side_b = side_b;
         this.is_weak = is_weak;
         this.attributes = attributes;
+    }
+
+    public markAsWeak(): void {
+        this.is_weak = true;
+
+        //TODO: make this take an entity as argument to mark the correct side as the identifiying side.
+        // Consider giving this method the responsiibility of marking the entity as weak too.
+    }
+
+    public hasRangedCardinality(side: side): boolean {
+        if (side == "a"){
+            return this.side_a.lower_cardinality != this.side_a.upper_cardinality;
+        }else if (side == "b"){
+            return this.side_b.lower_cardinality != this.side_b.upper_cardinality;
+        }
+        throw Error("Wrong side argument provided: " + side);
     }
 
     public toString(): string {

@@ -1,21 +1,33 @@
 import type {
     Model as LangiumModel,
     Attribute as LangiumAttribute,
-    Entity as LangiumEntity,
-    Relationship as LangiumRelationship,
+    // Entity as LangiumEntity,
+    // Relationship as LangiumRelationship,
     // Inheritance as LangiumInheritance,
     // MultiRelationShip as LangiumMultiRelationShip,
 
 } from '../generated/ast.js';
 
 import {Entity} from './Entity.js';
-import {Relationship, RelationshipConnection} from "./Relationship.js";
+import {Cardinality, Relationship, RelationshipConnection} from "./Relationship.js";
 import {Attribute} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
-// type AnyMetaType = Entity | Relationship | Attribute | RelationshipAttribute;
 // TODO: add MultiRelationship
 type AnyOutputMetaType = Entity | Relationship | "MultiRelationship";
+
+type cardinalityMap = {
+    "a": [Cardinality, Cardinality?],
+    "b": [Cardinality, Cardinality?]
+}
+
+function parseCardinality(cardinality: string): Cardinality {
+    if (cardinality === "*") {
+        return "*";
+    } else {
+        return parseInt(cardinality);
+    }
+}
 
 
 export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOutputMetaType[] {
@@ -28,26 +40,46 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
         for (const attribute of rawEntity.attributes) {
             attributes.push(createAttributeFromLangiumAttribute(attribute));
         }
-        const entity: Entity = new Entity(rawEntity.name, attributes, isEntityWeak(rawEntity));
+        const entity: Entity = new Entity(rawEntity.name, attributes, false);
         entityMap.set(rawEntity.name, entity);
         result.push(entity);
     }
 
 
     for (const rawRelationship of model.relationship) {
-        const is_weak = isRelationshipWeak(rawRelationship);
+        const is_weak = false;
+
+        const sides = rawRelationship.relationship.split("-")
+
+        const aCardinalities: Cardinality[] = sides[0].split("..").map(parseCardinality);
+        const bCardinalities: Cardinality[] = sides[1].split("..").map(parseCardinality);
+
+        //typescript shenanigans
+        const typedACardinalities: [Cardinality, Cardinality?] = [aCardinalities[0]];
+        if (aCardinalities.length > 1) {
+            typedACardinalities.push(aCardinalities[1]);
+        }
+        const typedBCardinalities: [Cardinality, Cardinality?] = [bCardinalities[0]];
+        if (bCardinalities.length > 1) {
+            typedBCardinalities.push(bCardinalities[1]);
+        }
+
+        const cardinalities: cardinalityMap = {
+            "a": typedACardinalities,
+            "b": typedBCardinalities
+        }
 
         const side_a: RelationshipConnection = {
             entity: entityMap.get(rawRelationship.entities[0]) as Entity,
-            lower_cardinality: 0,
-            upper_cardinality: "*", //TODO, get this from the language
-            identifies: false //TODO: support identifies in language
+            lower_cardinality: cardinalities["a"][0],
+            upper_cardinality: cardinalities["a"][1] ?? cardinalities["a"][0],
+            identifies: false
         };
         const side_b: RelationshipConnection = {
             entity: entityMap.get(rawRelationship.entities[1]) as Entity,
-            lower_cardinality: 0,
-            upper_cardinality: 1,
-            identifies: false //TODO: support identifies in language
+            lower_cardinality: cardinalities["b"][0],
+            upper_cardinality: cardinalities["b"][1] ?? cardinalities["b"][0],
+            identifies: false
         };
 
         const attributes: Attribute[] = [];
@@ -71,16 +103,6 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
 }
 
-function isEntityWeak(entity: LangiumEntity): boolean {
-    console.warn("isEntityWeak not implemented"); //TODO: Support weak in language
-    return false;
-}
-
-function isRelationshipWeak(relationship: LangiumRelationship): boolean {
-    console.warn("isRelationshipWeak not implemented"); //TODO: Support weak in language
-    return false;
-}
-
 function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attribute {
     let is_derived: boolean = false;
     let is_nullable: boolean = false;
@@ -90,21 +112,25 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
     let is_primary_key: boolean = false;
 
     for (const keyword of attribute.keywords) {
-        //TODO: make this more flexible with user input (and change to a switch maybe)
-        //TODO: read PK and FK
-        if (keyword === "Derived" || keyword === "derived") {
-            is_derived = true;
-            continue;
+        switch (keyword as string) {
+            case "Derived" || "derived":
+                is_derived = true;
+                break;
+            case "Unique" || "unique" :
+                is_unique = true;
+                break;
+            case "Nullable" || "nullable" :
+                is_nullable = true;
+                break;
+            case "FK" || "fk" :
+                is_foreign_key = true;
+                break;
+            case "PK" || "pk" :
+                is_primary_key = true;
+                break;
+            default:
+                throw new Error("Unknown keyword: " + keyword);
         }
-        if (keyword === "Unique" || keyword === "unique") {
-            is_unique = true;
-            continue;
-        }
-        if (keyword === "Nullable" || keyword === "nullable") {
-            is_nullable = true;
-            continue;
-        }
-        // throw new Error("Unknown keyword: " + keyword);
     }
 
     return new Attribute(attribute.name, attribute.type ?? "unknown", is_foreign_key, is_primary_key, is_unique, is_nullable, is_derived);

@@ -16,6 +16,11 @@ export class Entity {
         this.is_weak = is_weak;
     }
 
+
+    public markAsWeak(): void {
+        this.is_weak = true;
+    }
+
     public toString(): string {
         return this.simpleString();
     }
