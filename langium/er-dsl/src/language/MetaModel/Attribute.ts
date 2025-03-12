@@ -1,13 +1,24 @@
+export type DataTypeName = "bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float";
+
+export type DataType = {
+    name: DataTypeName;
+    value: number | undefined;
+}
+
+export function instantiateDataType(name: DataTypeName, value: number | undefined = undefined): DataType {
+    return {name, value};
+}
+
 export class Attribute{
     public name: string;
-    public datatype: string; //TODO: enum
+    public datatype: DataType | undefined;
     public is_foreign_key: boolean;
     public is_primary_key: boolean;
     public is_unique: boolean;
     public is_nullable: boolean;
     public is_derived: boolean;
 
-    constructor(name: string, datatype: string, // Non-default values
+    constructor(name: string, datatype: DataType |undefined, // Non-default values
                 is_foreign_key: boolean = false, is_primary_key: boolean = false, is_unique: boolean = false,
                 is_nullable: boolean = false, is_derived: boolean = false){
         this.name = name;

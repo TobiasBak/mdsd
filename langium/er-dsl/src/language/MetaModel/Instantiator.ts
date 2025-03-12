@@ -1,7 +1,7 @@
 import type {
     Model as LangiumModel,
     Attribute as LangiumAttribute,
-    // Entity as LangiumEntity,
+    Entity as LangiumEntity,
     // Relationship as LangiumRelationship,
     // Inheritance as LangiumInheritance,
     // MultiRelationShip as LangiumMultiRelationShip,
@@ -10,7 +10,7 @@ import type {
 
 import {Entity} from './Entity.js';
 import {Cardinality, Relationship, RelationshipConnection} from "./Relationship.js";
-import {Attribute} from "./Attribute.js";
+import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
 // TODO: add MultiRelationship
@@ -35,6 +35,8 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
     const entityMap: Map<string, Entity> = new Map();
 
+    const relationshipMap: Map<string, Relationship> = new Map();
+
     for (const rawEntity of model.entities) {
         const attributes: Attribute[] = [];
         for (const attribute of rawEntity.attributes) {
@@ -49,7 +51,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
     for (const rawRelationship of model.relationship) {
         const is_weak = false;
 
-        const sides = rawRelationship.relationship.split("-")
+        const sides = rawRelationship.cardinality
 
         const aCardinalities: Cardinality[] = sides[0].split("..").map(parseCardinality);
         const bCardinalities: Cardinality[] = sides[1].split("..").map(parseCardinality);
@@ -70,13 +72,13 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
         }
 
         const side_a: RelationshipConnection = {
-            entity: entityMap.get(rawRelationship.entities[0]) as Entity,
+            entity: getEntityFromRef(rawRelationship.entities[0].ref, entityMap),
             lower_cardinality: cardinalities["a"][0],
             upper_cardinality: cardinalities["a"][1] ?? cardinalities["a"][0],
             identifies: false
         };
         const side_b: RelationshipConnection = {
-            entity: entityMap.get(rawRelationship.entities[1]) as Entity,
+            entity: getEntityFromRef(rawRelationship.entities[1].ref, entityMap),
             lower_cardinality: cardinalities["b"][0],
             upper_cardinality: cardinalities["b"][1] ?? cardinalities["b"][0],
             identifies: false
@@ -88,19 +90,45 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
             attributes.push(createRelationshipAttributeFromLangiumAttribute(attribute));
         }
 
-        const name = rawRelationship.relationship;
+        const name = rawRelationship.string_array.join(" "); // TODO: look at whether this is in fact correct
         const relationship: Relationship = new Relationship(name, side_a, side_b, attributes, is_weak);
+
+        relationshipMap.set(rawRelationship.name, relationship);
+
         result.push(relationship);
     }
-
-    //TODO: inheritance and multi-relationship
-    // TODO: remember inheritance type of overlapping or disjoint
 
     // TODO: parse relationshipidentifiers and mark entities as weak
     // When parsing relationshipidentifiers mark the relationship as weak too
 
+    // for (const rawIdentifier of model.relationshipidentifiers) {
+    //
+    // }
+
+    //TODO: inheritance
+    // TODO: remember inheritance type of overlapping or disjoint
+
+
+
+
+    // TODO: multi-relationship
+
     return result;
 
+}
+
+
+function getEntityFromRef(entity: LangiumEntity |undefined, entityMap: Map<string, Entity>): Entity {
+    if (entity === undefined) {
+        throw new Error("Entity is undefined");
+    }
+
+    const entityName = entity.name;
+    const foundEntity = entityMap.get(entityName);
+    if (foundEntity === undefined) {
+        throw new Error("Entity not found: " + entityName);
+    }
+    return foundEntity;
 }
 
 function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attribute {
@@ -133,7 +161,59 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
         }
     }
 
-    return new Attribute(attribute.name, attribute.type ?? "unknown", is_foreign_key, is_primary_key, is_unique, is_nullable, is_derived);
+    return new Attribute(attribute.name, extractDataTypeFromLangiumType(attribute.type), is_foreign_key, is_primary_key, is_unique, is_nullable, is_derived);
+}
+
+function extractDataTypeFromLangiumType(type: string | undefined): DataType |undefined {
+    if (type === undefined) {
+        return undefined;
+    }
+
+    if (type.includes("(")){
+        const typename = type.split("(")[0];
+        const value = parseInt(type.split("(")[1].replaceAll(")", ""));
+
+        switch (typename[0]) {
+            case "char":
+                return instantiateDataType("char", value);
+            case "varchar":
+                return instantiateDataType("varchar", value);
+            default:
+                throw new Error("Unknown type with (): " + typename);
+        }
+    }
+
+    switch (type) {
+        case "bigint":
+            return instantiateDataType("bigint");
+        case "boolean" || "bool":
+            return instantiateDataType("boolean");
+        case "char":
+            return instantiateDataType("char");
+        case "varchar":
+            return  instantiateDataType("varchar");
+        case "date":
+            return  instantiateDataType("date");
+        case "int":
+            return  instantiateDataType("int");
+        case "real":
+            return  instantiateDataType("real");
+        case "smallint":
+            return instantiateDataType("smallint");
+        case "text":
+            return instantiateDataType("text");
+        case "uuid":
+            return instantiateDataType("uuid");
+        case "time":
+            return instantiateDataType("time");
+        case "timestamp":
+            return instantiateDataType("timestamp");
+        case "float":
+            return instantiateDataType("float");
+        default:
+            throw new Error("Unknown type: " + type);
+
+    }
 }
 
 function createRelationshipAttributeFromLangiumAttribute(attribute: LangiumAttribute): RelationshipAttribute {
