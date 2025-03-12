@@ -12,7 +12,7 @@ export const setupConfigExtended = (): UserConfig => {
             editorAppConfig: {
                 $type: 'extended',
                 languageId: 'goat-jh',
-                code: `// Jakob Hviid Notation for Data Management!\nentity(PK name string)\nentity2(PK id string, FK Derived name string)\n\nentity *-* entity2 : owns (date string)\n\nentity2 inherents from person\nInheritance from person is disjointed`,
+                code: `// Jakob Hviid Notation for Data Management!\nentity(PK name varchar)\nentity2(PK id varchar, FK Derived name varchar(255))\n\nentity *-* entity2 : 1 owns (slot date)\n\nentity2 inherits from person\nInheritance from person is disjointed`,
                 useDiffEditor: false,
                 extensions: [{
                     config: {
