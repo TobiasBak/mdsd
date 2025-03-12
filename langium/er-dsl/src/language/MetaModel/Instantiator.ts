@@ -3,23 +3,23 @@ import type {
     Attribute as LangiumAttribute,
     Entity as LangiumEntity,
     Relationship as LangiumRelationship,
-    Inheritance as LangiumInheritance,
-    MultiRelationShip as LangiumMultiRelationShip,
+    // Inheritance as LangiumInheritance,
+    // MultiRelationShip as LangiumMultiRelationShip,
 
 } from '../generated/ast.js';
 
-import {Entity} from './Entity';
+import {Entity} from './Entity.js';
 import {Relationship, RelationshipConnection} from "./Relationship.js";
 import {Attribute} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
-type AnyMetaType = Entity | Relationship | Attribute | RelationshipAttribute;
+// type AnyMetaType = Entity | Relationship | Attribute | RelationshipAttribute;
 // TODO: add MultiRelationship
 type AnyOutputMetaType = Entity | Relationship | "MultiRelationship";
 
 
 export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOutputMetaType[] {
-    const result: AnyMetaType[] = [];
+    const result: AnyOutputMetaType[] = [];
 
     const entityMap: Map<string, Entity> = new Map();
 
@@ -104,7 +104,7 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
             is_nullable = true;
             continue;
         }
-        throw new Error("Unknown keyword: " + keyword);
+        // throw new Error("Unknown keyword: " + keyword);
     }
 
     return new Attribute(attribute.name, attribute.type ?? "unknown", is_foreign_key, is_primary_key, is_unique, is_nullable, is_derived);

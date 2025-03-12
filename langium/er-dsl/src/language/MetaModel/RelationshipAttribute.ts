@@ -6,7 +6,7 @@ export class RelationshipAttribute extends Attribute {
         super(name, datatype, false, false, is_unique, is_nullable, is_derived);
     }
 
-    public toString(): string {
+    public override toString(): string {
         return `${this.name} : ${this.datatype} ${this.is_unique ? 'U' : ''} ${this.is_nullable ? 'N' : ''} ${this.is_derived ? 'D' : ''}`;
     }
 }
