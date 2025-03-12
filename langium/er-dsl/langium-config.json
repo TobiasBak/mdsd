@@ -4,9 +4,6 @@
         "id": "goat-jh",
         "grammar": "src/language/goat-jh.langium",
         "fileExtensions": [".JH"],
-        "textMate": {
-            "out": "syntaxes/goat-jh.tmLanguage.json"
-        },
         "monarch": {
             "out": "src/syntaxes/goat-jh.monarch.ts"
         }

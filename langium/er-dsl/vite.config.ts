@@ -10,7 +10,6 @@ export default defineConfig(() => {
             rollupOptions: {
                 input: {
                     index: path.resolve(__dirname, 'index.html'),
-                    monacoClassic: path.resolve(__dirname, 'static/monacoClassic.html'),
                     monacoExtended: path.resolve(__dirname, 'static/monacoExtended.html'),
                 }
             }
@@ -26,6 +25,7 @@ export default defineConfig(() => {
             }
         },
         server: {
+            open: '/static/monacoExtended.html',
             port: 5173
         }
     };

@@ -1,0 +1,56 @@
+{
+  "name": "goat-jh",
+  "scopeName": "source.goat-jh",
+  "fileTypes": [
+    ".JH"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "name": "keyword.control.goat-jh",
+      "match": "\\b(Inheritance|by|disjointed|from|identified|inherents|is|overlapping)\\b"
+    },
+    { 
+      "name": "markup.bold.goat-jh",
+      "match": "\\b(string|number)\\b"
+    },
+    { 
+      "name": "variable.parameter.goat-jh",
+      "match": "\\b(Derived|Unique|FK|PK)\\b"
+    }
+
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.goat-jh",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.goat-jh"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.goat-jh"
+            }
+          }
+        },
+        {
+          "begin": "//",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.goat-jh"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.goat-jh"
+        }
+      ]
+    }
+  }
+}
