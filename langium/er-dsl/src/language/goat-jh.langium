@@ -1,7 +1,14 @@
 grammar GoatJH
 
 entry Model:
-    (relationshipidentifiers+=RelationShipIdentifiers | entities+=Entity | relationship+=Relationship | multirelation+=MultiRelationShip | inheritance+=Inheritance | inheritanceType+=InheritanceType )*;
+    ( (WS2)(EOL)* |
+    relationshipidentifiers+=RelationShipIdentifiers | 
+    entities+=Entity | 
+    relationship+=Relationship | 
+    multirelation+=MultiRelationShip | 
+    inheritance+=Inheritance | 
+    inheritanceType+=InheritanceType 
+    )*;
 
 Entity:
     name=ID '(' (attributes+=Attribute (',' attributes+=Attribute)*)? ')' 
@@ -75,7 +82,9 @@ terminal REL_RANGE:
 
 terminal EOL: /\r?\n/;
 
+terminal WS2: /\s+/;
 hidden terminal WS: /[ \t]+/;
+
 terminal ID: /[_a-zA-Z][\w_]*/;
 
 hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
