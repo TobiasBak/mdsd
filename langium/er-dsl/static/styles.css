@@ -19,9 +19,22 @@ a:link {
 a:visited {
     color: lightskyblue;
 }
+
+.flex {
+    display: flex;
+    
+}
+
+#output-wrapper {
+    margin: 0 2%;
+    border: 1px solid red;
+    width: 50%;
+}
+
 /* for monaco */
 .wrapper {
-    padding: 0 5%;
+    padding: 0 2%;
+    width: 50%;
 }
 #monaco-editor-root {
     height: calc(100vh - 7.5rem - 70px);

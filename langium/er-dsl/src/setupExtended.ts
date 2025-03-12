@@ -4,7 +4,7 @@ import { configureWorker, defineUserServices } from './setupCommon.js';
 export const setupConfigExtended = (): UserConfig => {
     const extensionFilesOrContents = new Map();
     extensionFilesOrContents.set('/language-configuration.json', new URL('../language-configuration.json', import.meta.url));
-    extensionFilesOrContents.set('/goat-jh-grammar.json', new URL('../syntaxes/goat-jh.tmLanguage.json', import.meta.url));
+    extensionFilesOrContents.set('/goat-jh-grammar.json', new URL('../goat-jh.tmLanguage.json', import.meta.url));
 
     return {
         wrapperConfig: {
@@ -43,7 +43,7 @@ export const setupConfigExtended = (): UserConfig => {
                     json: JSON.stringify({
                         'workbench.colorTheme': 'Default Dark Modern',
                         'editor.semanticHighlighting.enabled': true,
-                        "editor.minimap.enabled": false
+                        'editor.minimap.enabled': false
                     })
                 }
             }
