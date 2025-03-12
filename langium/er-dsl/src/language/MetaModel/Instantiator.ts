@@ -2,7 +2,7 @@ import type {
     Model as LangiumModel,
     Attribute as LangiumAttribute,
     Entity as LangiumEntity,
-    // Relationship as LangiumRelationship,
+    Relationship as LangiumRelationship,
     // Inheritance as LangiumInheritance,
     // MultiRelationShip as LangiumMultiRelationShip,
 
@@ -98,17 +98,14 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
         result.push(relationship);
     }
 
-    // TODO: parse relationshipidentifiers and mark entities as weak
-    // When parsing relationshipidentifiers mark the relationship as weak too
-
-    // for (const rawIdentifier of model.relationshipidentifiers) {
-    //
-    // }
+    for (const rawIdentifier of model.relationshipidentifiers) {
+        const relationship = getRelationshipFromRef(rawIdentifier.identifier.ref, relationshipMap);
+        const entity = getEntityFromRef(rawIdentifier.entity.ref, entityMap);
+        relationship.markAsWeak(entity);
+    }
 
     //TODO: inheritance
     // TODO: remember inheritance type of overlapping or disjoint
-
-
 
 
     // TODO: multi-relationship
@@ -129,6 +126,19 @@ function getEntityFromRef(entity: LangiumEntity |undefined, entityMap: Map<strin
         throw new Error("Entity not found: " + entityName);
     }
     return foundEntity;
+}
+
+function getRelationshipFromRef(relationship: LangiumRelationship |undefined, relationshipMap: Map<string, Relationship>): Relationship {
+    if (relationship === undefined) {
+        throw new Error("Relationship is undefined");
+    }
+
+    const relationshipName = relationship.name;
+    const foundRelationship = relationshipMap.get(relationshipName);
+    if (foundRelationship === undefined) {
+        throw new Error("Relationship not found: " + relationshipName);
+    }
+    return foundRelationship;
 }
 
 function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attribute {

@@ -21,19 +21,30 @@ export class Relationship {
     public is_weak: boolean;
     public attributes: RelationshipAttribute[];
 
+    private entityMap: Map<Entity, RelationshipConnection>;
+
     constructor(name: string, side_a: RelationshipConnection, side_b: RelationshipConnection, attributes: RelationshipAttribute[], is_weak: boolean = false) {
         this.name = name;
         this.side_a = side_a;
         this.side_b = side_b;
         this.is_weak = is_weak;
         this.attributes = attributes;
+
+        this.entityMap = new Map();
+        this.entityMap.set(side_a.entity, side_a);
+        this.entityMap.set(side_b.entity, side_b);
     }
 
-    public markAsWeak(): void {
+    public markAsWeak(entity: Entity): void {
         this.is_weak = true;
 
-        //TODO: make this take an entity as argument to mark the correct side as the identifiying side.
-        // Consider giving this method the responsiibility of marking the entity as weak too.
+        const applicableConnection = this.entityMap.get(entity);
+        if (applicableConnection){
+            applicableConnection.identifies = true;
+            entity.markAsWeak()
+        }else {
+            throw Error(`Entity ${entity.name} is not part of the relationship ${this.name}. It has: ${this.side_a.entity.name} and ${this.side_b.entity.name}`);
+        }
     }
 
     public hasRangedCardinality(side: side): boolean {
