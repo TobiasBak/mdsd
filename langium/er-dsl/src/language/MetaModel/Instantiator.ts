@@ -115,7 +115,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 }
 
 
-function getEntityFromRef(entity: LangiumEntity |undefined, entityMap: Map<string, Entity>): Entity {
+function getEntityFromRef(entity: LangiumEntity | undefined, entityMap: Map<string, Entity>): Entity {
     if (entity === undefined) {
         throw new Error("Entity is undefined");
     }
@@ -128,7 +128,7 @@ function getEntityFromRef(entity: LangiumEntity |undefined, entityMap: Map<strin
     return foundEntity;
 }
 
-function getRelationshipFromRef(relationship: LangiumRelationship |undefined, relationshipMap: Map<string, Relationship>): Relationship {
+function getRelationshipFromRef(relationship: LangiumRelationship | undefined, relationshipMap: Map<string, Relationship>): Relationship {
     if (relationship === undefined) {
         throw new Error("Relationship is undefined");
     }
@@ -151,45 +151,50 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
 
     for (const keyword of attribute.keywords) {
         switch (keyword as string) {
-            case "Derived" || "derived":
+            case "derived":
+            case "Derived":
                 is_derived = true;
                 break;
-            case "Unique" || "unique" :
+            case "Unique":
+            case "unique" :
                 is_unique = true;
                 break;
-            case "Nullable" || "nullable" :
+            case "Nullable" :
+            case "nullable" :
                 is_nullable = true;
                 break;
-            case "FK" || "fk" :
+            case "FK" :
+            case "fk" :
                 is_foreign_key = true;
                 break;
-            case "PK" || "pk" :
+            case "PK" :
+            case "pk" :
                 is_primary_key = true;
                 break;
             default:
-                throw new Error("Unknown keyword: " + keyword);
+                throw new Error("Unknown keyword: '" + keyword + "'");
         }
     }
 
     return new Attribute(attribute.name, extractDataTypeFromLangiumType(attribute.type), is_foreign_key, is_primary_key, is_unique, is_nullable, is_derived);
 }
 
-function extractDataTypeFromLangiumType(type: string | undefined): DataType |undefined {
+function extractDataTypeFromLangiumType(type: string | undefined): DataType | undefined {
     if (type === undefined) {
         return undefined;
     }
 
-    if (type.includes("(")){
+    if (type.includes("(")) {
         const typename = type.split("(")[0];
         const value = parseInt(type.split("(")[1].replaceAll(")", ""));
 
-        switch (typename[0]) {
+        switch (typename) {
             case "char":
                 return instantiateDataType("char", value);
             case "varchar":
                 return instantiateDataType("varchar", value);
             default:
-                throw new Error("Unknown type with (): " + typename);
+                throw new Error("Unknown type with (): '" + typename + "'");
         }
     }
 
@@ -201,13 +206,13 @@ function extractDataTypeFromLangiumType(type: string | undefined): DataType |und
         case "char":
             return instantiateDataType("char");
         case "varchar":
-            return  instantiateDataType("varchar");
+            return instantiateDataType("varchar");
         case "date":
-            return  instantiateDataType("date");
+            return instantiateDataType("date");
         case "int":
-            return  instantiateDataType("int");
+            return instantiateDataType("int");
         case "real":
-            return  instantiateDataType("real");
+            return instantiateDataType("real");
         case "smallint":
             return instantiateDataType("smallint");
         case "text":

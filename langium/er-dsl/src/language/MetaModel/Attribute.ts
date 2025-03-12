@@ -31,6 +31,17 @@ export class Attribute{
     }
 
     public toString(): string {
-        return `${this.name} : ${this.datatype} ${this.is_foreign_key ? 'FK' : ''} ${this.is_primary_key ? 'PK' : ''} ${this.is_unique ? 'U' : ''} ${this.is_nullable ? 'N' : ''} ${this.is_derived ? 'D' : ''}`;
+        return this.allStringInfo();
+    }
+
+    public allStringInfo(): string {
+        return `${this.name} (
+            ${this.datatype ? this.datatype.name : ''}
+            ${this.is_foreign_key ? 'FK' : ''}
+            ${this.is_primary_key ? 'PK' : ''}
+            ${this.is_unique ? 'U' : ''}
+            ${this.is_nullable ? 'N' : ''}
+            ${this.is_derived ? 'D' : ''}
+        )\n`;
     }
 }

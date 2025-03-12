@@ -22,7 +22,8 @@ export class Entity {
     }
 
     public toString(): string {
-        return this.simpleString();
+        return this.allStringInfo();
+        // return this.simpleString();
     }
 
     private simpleString(): string {
@@ -34,6 +35,22 @@ export class Entity {
         }
 
         return result
+    }
+
+    private allStringInfo(): string {
+        let out: string = '';
+
+        const attributeString = "[" + this.attributes.map(attr => attr.toString()).join('; ') + ']';
+
+        out += `Entity: ${this.name} (
+            ${this.is_weak ? 'weak' : ''}
+            ${this.inheritanceType ? this.inheritanceType : ''}
+            ${this.parent ? "parent: " + this.parent.name : ''}
+            ${attributeString}
+        )\n`;
+
+
+        return out;
     }
 
     // private toPuml(): string {
