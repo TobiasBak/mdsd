@@ -10,11 +10,17 @@
     },
     {
       "name": "keyword.control.goat-jh",
-      "match": "\\b(Derived|Inheritance|Unique|by|disjointed|from|identified|inherents|is|overlapping)\\b"
+      "match": "\\b(Inheritance|by|disjointed|from|identified|inherents|is|overlapping)\\b"
     },
-    { "name": "markup.bold.goat-jh",
+    { 
+      "name": "markup.bold.goat-jh",
       "match": "\\b(string|number)\\b"
+    },
+    { 
+      "name": "variable.parameter.goat-jh",
+      "match": "\\b(Derived|Unique|FK|PK)\\b"
     }
+
   ],
   "repository": {
     "comments": {
