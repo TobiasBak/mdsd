@@ -100,15 +100,17 @@ hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 ## Content used
 ```
-Author(id number string, lol)
+Author(unique id char(50), lol varchar)
 
-Author *-* Test : is owned (Goated number)
+Author *-* Test : 1 is owned (Goated int)
 
-Author - Goated - LOL, *-*-* : makes gooated (goated number)
+Author - Goated - LOL, *-*-* : 2 makes gooated (goated int)
 
-Goated, LOL inherents from Author
+Goated, LOL inherits from Author
 
 Inheritance from Goated is disjointed
 
 Inheritance from Author is overlapping 
+
+Author is identified by 1
 ```
