@@ -26,6 +26,7 @@ export default defineConfig(() => {
             }
         },
         server: {
+            open: '/static/monacoExtended.html',
             port: 5173
         }
     };
