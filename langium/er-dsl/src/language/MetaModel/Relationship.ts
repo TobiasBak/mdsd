@@ -1,5 +1,5 @@
-import {Entity} from "./Entity.js";
-import {RelationshipAttribute} from "./RelationshipAttribute.js";
+import { Entity } from "./Entity.js";
+import { RelationshipAttribute } from "./RelationshipAttribute.js";
 
 export type many = '*';
 
@@ -26,6 +26,19 @@ export class Relationship {
     }
 
     public toString(): string {
-        return `${this.name} ${this.is_weak ? 'W' : ''}`;
+        return this.simpleString();
+    }
+
+
+    private simpleString(): string {
+        let result: string = '';
+        const { entity: entityA } = this.side_a;
+        const { entity: entityB } = this.side_b;
+
+        const multiplicityA = `${this.side_a.lower_cardinality}..${this.side_a.upper_cardinality}`;
+        const multiplicityB = `${this.side_b.lower_cardinality}..${this.side_b.upper_cardinality}`;
+
+        result += `Relationship: ${this.name} between ${entityA.name} (${multiplicityA}) and ${entityB.name} (${multiplicityB})\n`;
+        return result
     }
 }
