@@ -14,9 +14,11 @@ import {Attribute} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
 type AnyMetaType = Entity | Relationship | Attribute | RelationshipAttribute;
+// TODO: add MultiRelationship
+type AnyOutputMetaType = Entity | Relationship | "MultiRelationship";
 
 
-export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyMetaType[] {
+export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOutputMetaType[] {
     const result: AnyMetaType[] = [];
 
     const entityMap: Map<string, Entity> = new Map();
@@ -60,6 +62,10 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyMe
     }
 
     //TODO: inheritance and multi-relationship
+    // TODO: remember inheritance type of overlapping or disjoint
+
+    // TODO: parse relationshipidentifiers and mark entities as weak
+    // When parsing relationshipidentifiers mark the relationship as weak too
 
     return result;
 
@@ -81,18 +87,20 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
     let is_unique: boolean = false;
 
     let is_foreign_key: boolean = false;
-    let is_primary_key: boolean = false; //TODO: support these in language
+    let is_primary_key: boolean = false;
 
     for (const keyword of attribute.keywords) {
-        if (keyword === "derived") {
+        //TODO: make this more flexible with user input (and change to a switch maybe)
+        //TODO: read PK and FK
+        if (keyword === "Derived" || keyword === "derived") {
             is_derived = true;
             continue;
         }
-        if (keyword === "unique") {
+        if (keyword === "Unique" || keyword === "unique") {
             is_unique = true;
             continue;
         }
-        if (keyword === "nullable") {
+        if (keyword === "Nullable" || keyword === "nullable") {
             is_nullable = true;
             continue;
         }
