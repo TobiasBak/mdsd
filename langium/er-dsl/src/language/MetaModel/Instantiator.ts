@@ -14,7 +14,7 @@ import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
 // TODO: add MultiRelationship
-type AnyOutputMetaType = Entity | Relationship | "MultiRelationship";
+export type AnyOutputMetaType = Entity | Relationship | "MultiRelationship";
 
 type cardinalityMap = {
     "a": [Cardinality, Cardinality?],

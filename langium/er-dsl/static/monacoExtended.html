@@ -22,15 +22,28 @@
             <p style="font-style:italic">Powered by</p>
             <img width="125" src="https://langium.org/assets/langium_logo_w_nib.svg" alt="Langium">
         </footer>
+        
         <!-- Monaco Configuration -->
         <script type="module">
             // vite is used to resolve the included TypeScript files
             import { configureMonacoWorkers } from '../src/setupCommon';
             import { executeExtended } from '../src/setupExtended';
+            import { generatePlantUMLImage} from '../src/plantuml';
 
             configureMonacoWorkers();
             // keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
             const startingPromise = executeExtended(document.getElementById('monaco-editor-root'));
+
+        </script>
+        <script src="../src/rawdeflate.js"></script>
+        <script src="../src/plantuml.js"></script>
+        <script>
+            // Handle messages from the worker
+            self.addEventListener('message', event => {
+                if (event.data.type === 'generatePlantUMLImage') {
+                    generatePlantUMLImage(event.data.umldiagram);
+                }
+            });
         </script>
     </body>
 </html>
