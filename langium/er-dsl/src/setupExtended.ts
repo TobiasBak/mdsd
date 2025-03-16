@@ -1,6 +1,8 @@
 import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
 import { configureWorker, defineUserServices } from './setupCommon.js';
 
+import { generatePlantUMLImage } from './plantuml/plantuml.js';
+
 export const setupConfigExtended = (): UserConfig => {
     const extensionFilesOrContents = new Map();
     extensionFilesOrContents.set('/language-configuration.json', new URL('../language-configuration.json', import.meta.url));
@@ -56,4 +58,18 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
     const userConfig = setupConfigExtended();
     const wrapper = new MonacoEditorLanguageClientWrapper();
     await wrapper.initAndStart(userConfig, htmlElement);
+
+    const client = wrapper.getLanguageClient();
+    if (!client) {
+        throw new Error('Unable to obtain language client for the Minilogo!');
+    }
+
+    client.onNotification('browser/DocumentChange', (resp) => {
+        const umltext = resp.content;
+
+        // Call the PlantUML server to generate the diagram
+        generatePlantUMLImage(umltext);
+        
+    });
+
 };
