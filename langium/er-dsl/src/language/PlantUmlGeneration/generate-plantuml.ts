@@ -18,7 +18,7 @@ export function generateUMLDiagram(model: AnyOutputMetaType[]): string {
         ${entities.map((entity) => {
             return `entity ${entity.name} ${entity.is_weak ? '<<weak>>' : ''} {
                 ${entity.attributes.map((attribute) => {
-                    return `${attribute.name} : ${attribute.datatype?.name} ${generateKeyword(attribute)}`;
+                    return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
                 }).join('\n')}
             }`;
         }).join('\n\n')}
@@ -26,7 +26,7 @@ export function generateUMLDiagram(model: AnyOutputMetaType[]): string {
         ${relationships.map((relationship) => {
             return `relationship "${relationship.name}" as ${relationship.name} ${relationship.is_weak ? "<<identifying>>" : ""} {
                 ${relationship.attributes.map((attribute) => {
-                    return `${attribute.name} : ${attribute.datatype?.name} ${generateKeyword(attribute)}`;
+                    return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
                 }).join('\n')}
             }`;
         }).join('\n\n')}
@@ -70,6 +70,13 @@ function generateKeyword(attribute: Attribute): string {
     }
 
     return out;
+}
+
+function getDataTypeString(attribute: Attribute): string {
+    if (attribute.datatype?.value != undefined){
+        return `${attribute.datatype.name} ${attribute.datatype.value}`;
+    }
+    return `${attribute.datatype?.name}`;
 }
 
 function getCardinality(side: RelationshipConnection): string {
