@@ -48,11 +48,13 @@ if (typeof window !== 'undefined') {
     } else if (window.Worker) {
         deflater = new Worker('../src/rawdeflate.js');
         deflater.onmessage = done_deflating;
+        console.log('Using WebWorker');
     }
 }
 
 function done_deflating(e) {
     const imgUrl = "http://www.plantuml.com/plantuml/img/" + encode64(e.data);
+    console.log(imgUrl);
     document.getElementById('output-plantuml').innerHTML = `<img src="${imgUrl}" alt="PlantUML Image" />`;
 }
 

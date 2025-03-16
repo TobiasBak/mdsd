@@ -1,7 +1,7 @@
 import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
 import { configureWorker, defineUserServices } from './setupCommon.js';
 
-import { generatePlantUMLImage } from './plantuml/plantuml.js';
+import { generatePlantUMLImage } from './plantuml.js';
 
 export const setupConfigExtended = (): UserConfig => {
     const extensionFilesOrContents = new Map();
@@ -66,6 +66,7 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
 
     client.onNotification('browser/DocumentChange', (resp) => {
         const umltext = resp.content;
+        console.log('Received UML text: ', umltext);
 
         // Call the PlantUML server to generate the diagram
         generatePlantUMLImage(umltext);
