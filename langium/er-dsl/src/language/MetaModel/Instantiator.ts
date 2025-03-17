@@ -9,16 +9,16 @@ import type {
 } from '../generated/ast.js';
 
 import {Entity} from './Entity.js';
-import {Cardinality, Relationship, RelationshipConnection} from "./Relationship.js";
+import {Relationship} from "./Relationship.js";
+import {Cardinality, MultiRelationship, RelationshipConnection} from "./MultiRelationship.js";
 import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
-// TODO: add MultiRelationship
-type AnyOutputMetaType = Entity | Relationship | "MultiRelationship";
+type AnyOutputMetaType = Entity | Relationship | MultiRelationship;
 
-type cardinalityMap = {
-    "a": [Cardinality, Cardinality?],
-    "b": [Cardinality, Cardinality?]
+type CardinalityRange = {
+    lower: Cardinality,
+    upper: Cardinality
 }
 
 function parseCardinality(cardinality: string): Cardinality {
@@ -29,6 +29,31 @@ function parseCardinality(cardinality: string): Cardinality {
     }
 }
 
+function extractCardinalitiesFromCardinalityArray(cardinalityArray: string[]): CardinalityRange[] {
+    const output: CardinalityRange[] = [];
+    for (const cardinality of cardinalityArray) {
+        const cardinalities = cardinality.split("..");
+        if (cardinalities.length == 1) {
+            cardinalities.push(cardinalities[0]);
+        }
+        output.push({lower: parseCardinality(cardinalities[0]), upper: parseCardinality(cardinalities[1])});
+    }
+
+    if (output.length < 2){
+        throw new Error(`Cardinality array from '${cardinalityArray}' must have at least 2 elements, but has ${output.length}`);
+    }
+
+    return output;
+}
+
+
+function createAttributesForRelationship(rawAttributes: LangiumAttribute[]) {
+    const attributes: RelationshipAttribute[] = [];
+    for (const attribute of rawAttributes) {
+        attributes.push(createRelationshipAttributeFromLangiumAttribute(attribute));
+    }
+    return attributes;
+}
 
 export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOutputMetaType[] {
     const result: AnyOutputMetaType[] = [];
@@ -36,6 +61,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
     const entityMap: Map<string, Entity> = new Map();
 
     const relationshipMap: Map<string, Relationship> = new Map();
+    const multiRelationshipMap: Map<string, MultiRelationship> = new Map();
 
     for (const rawEntity of model.entities) {
         const attributes: Attribute[] = [];
@@ -50,45 +76,22 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
     for (const rawRelationship of model.relationship) {
         const is_weak = false;
-
-        const sides = rawRelationship.cardinality
-
-        const aCardinalities: Cardinality[] = sides[0].split("..").map(parseCardinality);
-        const bCardinalities: Cardinality[] = sides[1].split("..").map(parseCardinality);
-
-        //typescript shenanigans
-        const typedACardinalities: [Cardinality, Cardinality?] = [aCardinalities[0]];
-        if (aCardinalities.length > 1) {
-            typedACardinalities.push(aCardinalities[1]);
-        }
-        const typedBCardinalities: [Cardinality, Cardinality?] = [bCardinalities[0]];
-        if (bCardinalities.length > 1) {
-            typedBCardinalities.push(bCardinalities[1]);
-        }
-
-        const cardinalities: cardinalityMap = {
-            "a": typedACardinalities,
-            "b": typedBCardinalities
-        }
+        const cardinalities = extractCardinalitiesFromCardinalityArray(rawRelationship.cardinality);
 
         const side_a: RelationshipConnection = {
             entity: getEntityFromRef(rawRelationship.entities[0].ref, entityMap),
-            lower_cardinality: cardinalities["a"][0],
-            upper_cardinality: cardinalities["a"][1] ?? cardinalities["a"][0],
+            lower_cardinality: cardinalities[0][0],
+            upper_cardinality: cardinalities[0][1],
             identifies: false
         };
         const side_b: RelationshipConnection = {
             entity: getEntityFromRef(rawRelationship.entities[1].ref, entityMap),
-            lower_cardinality: cardinalities["b"][0],
-            upper_cardinality: cardinalities["b"][1] ?? cardinalities["b"][0],
+            lower_cardinality: cardinalities[1][0],
+            upper_cardinality: cardinalities[1][1],
             identifies: false
         };
 
-        const attributes: Attribute[] = [];
-
-        for (const attribute of rawRelationship.attributes) {
-            attributes.push(createRelationshipAttributeFromLangiumAttribute(attribute));
-        }
+        const attributes: Attribute[] = createAttributesForRelationship(rawRelationship.attributes);
 
         const name = rawRelationship.string_array.join(" "); // TODO: look at whether this is in fact correct
         const relationship: Relationship = new Relationship(name, side_a, side_b, attributes, is_weak);
@@ -104,11 +107,45 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
         relationship.markAsWeak(entity);
     }
 
-    //TODO: inheritance
-    // TODO: remember inheritance type of overlapping or disjoint
 
+    for ( const inheritance of model.inheritance) {
+        const parentEntity = getEntityFromRef(inheritance.parent.ref, entityMap);
+        for (const child of inheritance.children) {
+            const childEntity = getEntityFromRef(child.ref, entityMap);
+            parentEntity.addChild(childEntity);
+        }
+    }
 
-    // TODO: multi-relationship
+    for (const inheritanceType of model.inheritanceType){
+        const entity = getEntityFromRef(inheritanceType.entity.ref, entityMap);
+        if (inheritanceType.type == "disjointed"){
+            entity.setInheritanceType("disjoint");
+        }else if(inheritanceType.type == "overlapping"){
+            entity.setInheritanceType("overlapping");
+        }else {
+            throw new Error("Unknown inheritance type: " + inheritanceType.type);
+        }
+    }
+
+    for (const multiRelationship of model.multirelation){
+        const connections: RelationshipConnection[] = [];
+        const cardinalities = extractCardinalitiesFromCardinalityArray(multiRelationship.cardinality);
+        for (let i: number = 0; i < multiRelationship.entities.length; i++){
+            const entity = getEntityFromRef(multiRelationship.entities[i].ref, entityMap);
+            const lower_cardinality = cardinalities[i].lower;
+            const upper_cardinality = cardinalities[i].upper;
+            const identifies = false; // TODO: should this be available in the language?
+            connections.push({entity, lower_cardinality, upper_cardinality, identifies});
+        }
+
+        const attributes = createAttributesForRelationship(multiRelationship.attributes);
+        const name = multiRelationship.string_array.join(" ");
+        const multiRel = new MultiRelationship(name, connections, attributes);
+        multiRelationshipMap.set(multiRelationship.name, multiRel);
+        //TODO: entity can be identified by multi relationship? (currently not in the language, but maybe should be)
+
+        result.push(multiRel);
+    }
 
     return result;
 
