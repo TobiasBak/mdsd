@@ -20,12 +20,11 @@ export class Relationship extends MultiRelationship {
         throw Error("Wrong side argument provided: " + side);
     }
 
-    public toString(): string {
+    public override toString(): string {
         return this.simpleString();
     }
 
-
-    private simpleString(): string {
+    override simpleString(): string {
         let result: string = '';
         const { entity: entityA } = this.side_a;
         const { entity: entityB } = this.side_b;

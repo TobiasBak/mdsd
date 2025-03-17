@@ -31,7 +31,8 @@ function parseCardinality(cardinality: string): Cardinality {
 
 function extractCardinalitiesFromCardinalityArray(cardinalityArray: string[]): CardinalityRange[] {
     const output: CardinalityRange[] = [];
-    for (const cardinality of cardinalityArray) {
+    for (let cardinality of cardinalityArray) {
+        cardinality = `${cardinality}`;
         const cardinalities = cardinality.split("..");
         if (cardinalities.length == 1) {
             cardinalities.push(cardinalities[0]);
@@ -80,14 +81,14 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
         const side_a: RelationshipConnection = {
             entity: getEntityFromRef(rawRelationship.entities[0].ref, entityMap),
-            lower_cardinality: cardinalities[0][0],
-            upper_cardinality: cardinalities[0][1],
+            lower_cardinality: cardinalities[0].lower,
+            upper_cardinality: cardinalities[0].upper,
             identifies: false
         };
         const side_b: RelationshipConnection = {
             entity: getEntityFromRef(rawRelationship.entities[1].ref, entityMap),
-            lower_cardinality: cardinalities[1][0],
-            upper_cardinality: cardinalities[1][1],
+            lower_cardinality: cardinalities[1].lower,
+            upper_cardinality: cardinalities[1].upper,
             identifies: false
         };
 

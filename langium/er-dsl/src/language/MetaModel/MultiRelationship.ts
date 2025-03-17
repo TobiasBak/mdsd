@@ -51,7 +51,7 @@ export class MultiRelationship {
     }
 
 
-    private simpleString(): string { // TODO: fix this for multi relationships
+    simpleString(): string { // TODO: fix this for multi relationships
         let result: string = '';
         const { entity: entityA } = this.connections[0];
         const { entity: entityB } = this.connections[1];
