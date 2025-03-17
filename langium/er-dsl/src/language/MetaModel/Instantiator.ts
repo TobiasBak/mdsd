@@ -21,7 +21,7 @@ type CardinalityRange = {
     upper: Cardinality
 }
 
-type RelationshipMapType = Map<number, Relationship>;
+type RelationshipMapType = Map<string, Relationship>;
 
 function parseCardinality(cardinality: string): Cardinality {
     if (cardinality === "*") {
@@ -106,7 +106,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
     for (const rawIdentifier of model.relationshipidentifiers) {
         console.log("rawIdentifier: ", rawIdentifier);
-        const relationship = getRelationshipFromRef(rawIdentifier.identifier, relationshipMap);
+        const relationship = getRelationshipFromRef(rawIdentifier.identifier.ref, relationshipMap);
         const entity = getEntityFromRef(rawIdentifier.entity.ref, entityMap);
         relationship.markAsWeak(entity);
     }
