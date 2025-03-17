@@ -41,15 +41,16 @@ export class GoatJhValidator {
     }
 
     checkAttributeDoesNotHaveDuplicateKeywords(attribute: Attribute, accept: ValidationAcceptor): void {
-        attribute.keywords = attribute.keywords.map(keyword => keyword.toLowerCase());
-        for (let i = 0; i < attribute.keywords.length; i++) {
-            for (let j = i + 1; j < attribute.keywords.length; j++) {
-                if (attribute.keywords[i] === attribute.keywords[j]) {
-                    accept('warning', 'One or more keywords are duplicate.', { node: attribute, property: 'keywords' });
-                    break;
-                }
+        const reported = new Set();
+        
+        attribute.keywords.forEach((keyword) => {
+            if (reported.has(keyword.toLowerCase())) {
+                accept('warning', 'An attribute should not have duplicate keywords.', { node: attribute, property: 'keywords' });
             }
-        }        
+            reported.add(keyword.toLowerCase());
+        });
+
+
     }
 
 
