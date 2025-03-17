@@ -83,7 +83,7 @@ function getCardinality(side: RelationshipConnection): string {
     if (side.lower_cardinality == side.upper_cardinality){
         return `${convertAsteriskToN(side.lower_cardinality)}`;
     }else {
-        return `(${side.lower_cardinality},${side.upper_cardinality})`;
+        return `(${convertAsteriskToN(side.lower_cardinality)},${convertAsteriskToN(side.upper_cardinality)})`;
     }
 }
 
