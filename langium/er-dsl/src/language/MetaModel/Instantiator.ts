@@ -21,6 +21,8 @@ type CardinalityRange = {
     upper: Cardinality
 }
 
+type RelationshipMapType = Map<number, Relationship>;
+
 function parseCardinality(cardinality: string): Cardinality {
     if (cardinality === "*") {
         return "*";
@@ -61,7 +63,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
     const entityMap: Map<string, Entity> = new Map();
 
-    const relationshipMap: Map<string, Relationship> = new Map();
+    const relationshipMap: RelationshipMapType = new Map();
     const multiRelationshipMap: Map<string, MultiRelationship> = new Map();
 
     for (const rawEntity of model.entities) {
@@ -103,7 +105,8 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
     }
 
     for (const rawIdentifier of model.relationshipidentifiers) {
-        const relationship = getRelationshipFromRef(rawIdentifier.identifier.ref, relationshipMap);
+        console.log("rawIdentifier: ", rawIdentifier);
+        const relationship = getRelationshipFromRef(rawIdentifier.identifier, relationshipMap);
         const entity = getEntityFromRef(rawIdentifier.entity.ref, entityMap);
         relationship.markAsWeak(entity);
     }
@@ -166,9 +169,9 @@ function getEntityFromRef(entity: LangiumEntity | undefined, entityMap: Map<stri
     return foundEntity;
 }
 
-function getRelationshipFromRef(relationship: LangiumRelationship | undefined, relationshipMap: Map<string, Relationship>): Relationship {
+function getRelationshipFromRef(relationship: LangiumRelationship | undefined, relationshipMap: RelationshipMapType): Relationship {
     if (relationship === undefined) {
-        throw new Error("Relationship is undefined");
+        throw new Error(`Relationship is undefined in map with keys: ${Array.from(relationshipMap.keys()).join(", ")}`);
     }
 
     const relationshipName = relationship.name;
