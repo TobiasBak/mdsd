@@ -7,7 +7,7 @@ entry Model:
     relationship+=Relationship | 
     multirelation+=MultiRelationShip | 
     inheritance+=Inheritance | 
-    inheritanceType+=InheritanceType 
+    inheritanceType+=InheritanceType
     )*;
 
 Entity:
@@ -62,11 +62,30 @@ RelationShipIdentifiers:
     EOL*
     ;
 
+// Left recursion
+Expression: Addition;
+
+Addition infers Expression:
+    Multiplication ({infer Addition.left=current} operator=('+' | '-') right=Multiplication)*;
+
+Multiplication infers Expression:
+    Exponent ({infer Multiplication.left=current} operator=('*' | '/') right=Exponent)*;
+
+Exponent infers Expression:
+    Primary ({infer Exponent.left=current} operator=('^') right=Primary)* |
+    'sqrt''(' ({infer Unary} expression=Addition) ')' |
+    Primary;
+
+Primary infers Expression:
+    '(' Addition ')'|
+    value=INT;    
+
+TYPES: type="char" "(" value=Expression ")" | type="varchar" "(" value=Expression ")" | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float");
+
+
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 
 // THEREFORE ID SHOULD BE THE LAST MATCH TO BE CHEKCED
 terminal KEYWORDS: 'PK' | 'pk' | 'FK' | 'fk' | 'Nullable' | 'nullable' | 'Derived' | 'derived' | 'Unique' | 'unique';
-terminal TYPES: "bigint" | "boolean" | "bool" | "char(" INT ")" | "char" | "varchar(" INT ")" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float";
-
 
 terminal RANGE_PATTERN: 
     ('*' | INT '..' INT | INT '..' '*');
@@ -85,5 +104,3 @@ hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 //hidden terminal NL: /[\r\n]+/;
-
-
