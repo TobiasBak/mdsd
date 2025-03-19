@@ -16,6 +16,12 @@ import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
 type AnyOutputMetaType = Entity | Relationship | MultiRelationship;
 
+type InstantiatedOutput = {
+    entities: Entity[],
+    relationships: Relationship[],
+    multiRelationships: MultiRelationship[]
+}
+
 type CardinalityRange = {
     lower: Cardinality,
     upper: Cardinality
@@ -58,8 +64,12 @@ function createAttributesForRelationship(rawAttributes: LangiumAttribute[]) {
     return attributes;
 }
 
-export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOutputMetaType[] {
-    const result: AnyOutputMetaType[] = [];
+export function instantiateMetaModelFromLangiumModel(model: LangiumModel): InstantiatedOutput {
+    const result: InstantiatedOutput = {
+        entities: [],
+        relationships: [],
+        multiRelationships: []
+    };
 
     const entityMap: Map<string, Entity> = new Map();
 
@@ -73,7 +83,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
         }
         const entity: Entity = new Entity(rawEntity.name, attributes, false);
         entityMap.set(rawEntity.name, entity);
-        result.push(entity);
+        result.entities.push(entity);
     }
 
 
@@ -101,7 +111,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
         relationshipMap.set(rawRelationship.name, relationship);
 
-        result.push(relationship);
+        result.relationships.push(relationship);
     }
 
     for (const rawIdentifier of model.relationshipidentifiers) {
@@ -148,7 +158,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
         multiRelationshipMap.set(multiRelationship.name, multiRel);
         //TODO: entity can be identified by multi relationship? (currently not in the language, but maybe should be)
 
-        result.push(multiRel);
+        result.multiRelationships.push(multiRel);
     }
 
     return result;
