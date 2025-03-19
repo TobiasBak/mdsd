@@ -1,8 +1,8 @@
 ```mermaid
 kanban
     column1[TODO]
-        task7[**Webserver:** Creating a process that runs the cli on user input in the frontend]@{assigned: Noone}
         task9[Validation + syntaxttingeling efter senere lectures]@{assigned: Noone}
+        task7[**Requirements:** Create a left recursion problem and solve it]@{assigned: Noone}
     column2[Underway]
         task5[**Generation:** Generating the plantuml files to feed the plantuml live server]@{assigned: RASSERN}
         task6[**Generation:** Generate SQL code in a .sql file]@{assigned: THOR}
