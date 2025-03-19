@@ -18,26 +18,7 @@ Entity:
 // The attribute must have all different permutations of the keywords to allow for arbitrary ordering.
 // Since each fragment allows for the keyword to be optional, we do not need to specify all permutations with no keyword.
 Attribute:
-    (Unique Derived Primary_Foreign Nullable | Unique Derived Nullable Primary_Foreign | Unique Primary_Foreign Derived Nullable | Unique Primary_Foreign Nullable Derived | Unique Nullable Derived Primary_Foreign | Unique Nullable Primary_Foreign Derived |
-     Derived Unique Primary_Foreign Nullable | Derived Unique Nullable Primary_Foreign | Derived Primary_Foreign Unique Nullable | Derived Primary_Foreign Nullable Unique | Derived Nullable Unique Primary_Foreign | Derived Nullable Primary_Foreign Unique |
-     Primary_Foreign Unique Derived Nullable | Primary_Foreign Unique Nullable Derived | Primary_Foreign Derived Unique Nullable | Primary_Foreign Derived Nullable Unique | Primary_Foreign Nullable Unique Derived | Primary_Foreign Nullable Derived Unique |
-     Nullable Unique Derived Primary_Foreign | Nullable Unique Primary_Foreign Derived | Nullable Derived Unique Primary_Foreign | Nullable Derived Primary_Foreign Unique | Nullable Primary_Foreign Unique Derived | Nullable Primary_Foreign Derived Unique)?
-    name=ID DataType?;
-
-fragment Unique:
-    keywords+=('Unique' | 'unique')?;
-
-fragment Derived:
-    keywords+=('Derived' | 'derived')?;
-
-fragment Nullable:
-    keywords+=('Nullable' | 'nullable')?;
-
-fragment Primary_Foreign:
-    keywords+=KEYWORDSKEYS?;
-
-fragment DataType:
-    type=TYPES?;
+    keywords+=(KEYWORDS)* name=ID type=TYPES?;
 
 Relationship:
     entities+=[Entity:ID]               
@@ -77,15 +58,14 @@ InheritanceType:
     ;
 
 RelationShipIdentifiers:
-    entity=[Entity:ID] 'is''identified' 'by' identifier=[Relationship:INT]
+    entity=[Entity:ID] 'is''identified' 'by' identifier=INT
     EOL*
     ;
 
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 
 // THEREFORE ID SHOULD BE THE LAST MATCH TO BE CHEKCED
-terminal KEYWORDSKEYS: 'PK' | 'FK';
+terminal KEYWORDS: 'PK' | 'pk' | 'FK' | 'fk' | 'Nullable' | 'nullable' | 'Derived' | 'derived' | 'Unique' | 'unique';
 terminal TYPES: "bigint" | "boolean" | "bool" | "char(" INT ")" | "char" | "varchar(" INT ")" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float";
-
 
 
 terminal RANGE_PATTERN: 

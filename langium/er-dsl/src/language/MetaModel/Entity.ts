@@ -7,7 +7,7 @@ export class Entity {
     public name: string;
     public attributes: Attribute[];
     public is_weak: boolean;
-    public parent: Entity | null = null;
+    public children: Entity[] = [];
     public inheritanceType: InheritanceType | null = null;
 
     constructor(name: string, attributes: Attribute[], is_weak: boolean) {
@@ -19,6 +19,17 @@ export class Entity {
 
     public markAsWeak(): void {
         this.is_weak = true;
+    }
+
+    public addChild(child: Entity): void {
+        this.children.push(child);
+    }
+
+    public setInheritanceType(type: InheritanceType): void {
+        if (this.inheritanceType != null) {
+            throw new Error(`Cannot set inheritance type to '${type}' because it is already set to '${this.inheritanceType}'`);
+        }
+        this.inheritanceType = type;
     }
 
     public toString(): string {
@@ -45,7 +56,6 @@ export class Entity {
         out += `Entity: ${this.name} (
             ${this.is_weak ? 'weak' : ''}
             ${this.inheritanceType ? this.inheritanceType : ''}
-            ${this.parent ? "parent: " + this.parent.name : ''}
             ${attributeString}
         )\n`;
 
