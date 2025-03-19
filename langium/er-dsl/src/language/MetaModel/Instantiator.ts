@@ -14,9 +14,7 @@ import {Cardinality, MultiRelationship, RelationshipConnection} from "./MultiRel
 import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
 
-type AnyOutputMetaType = Entity | Relationship | MultiRelationship;
-
-type InstantiatedOutput = {
+export type InstantiatedOutput = {
     entities: Entity[],
     relationships: Relationship[],
     multiRelationships: MultiRelationship[]
