@@ -2,6 +2,7 @@ import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wra
 import { configureWorker, defineUserServices } from './setupCommon.js';
 
 import { generatePlantUMLImage } from './plantuml.js';
+import plantumlEncoder from 'plantuml-encoder';
 
 export const setupConfigExtended = (): UserConfig => {
     const extensionFilesOrContents = new Map();
@@ -64,13 +65,21 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
         throw new Error('Unable to obtain language client for the Minilogo!');
     }
 
+    // PlantUML generation
     client.onNotification('browser/DocumentChange', (resp) => {
         const umltext = resp.content;
         console.log('Received UML text: ', umltext);
-
-        // Call the PlantUML server to generate the diagram
-        generatePlantUMLImage(umltext);
+        let encoded = plantumlEncoder.encode(umltext);
+        const imgUrl = `http://www.plantuml.com/plantuml/img/${encoded}`;
         
+        const outputElement = document.getElementById('output-plantuml');
+        if (outputElement) {
+            outputElement.innerHTML = `<img src="${imgUrl}" alt="PlantUML Image" />`;
+        } else {
+            console.error('Element with ID "output-plantuml" not found in the DOM.');
+        }        
     });
+
+    
 
 };
