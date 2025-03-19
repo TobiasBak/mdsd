@@ -5,6 +5,8 @@ import { createGoatJhServices } from './goat-jh-module.js';
 
 
 import { Model } from './generated/ast.js';
+import {generateSQLFile} from "./SQL/SQLGenerator.js";
+import {instantiateMetaModelFromLangiumModel} from "./MetaModel/Instantiator.js";
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -31,13 +33,14 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, documents
     // perform this for every validated document in this build phase batch
     for (const document of documents) {
         const model = document.parseResult.value as Model;
-        console.log(model);
         
         // only generate commands if there are no errors
         if(document.diagnostics === undefined 
             || document.diagnostics.filter((i) => i.severity === 1).length === 0
             ) {
-            console.log('No errors found, generating commands...'); 
+            console.log('No errors found, generating commands...');
+            const sql = generateSQLFile(instantiateMetaModelFromLangiumModel(model));
+            console.log("Generated sql:",sql)
         } else {
             console.log('Errors found, not generating commands...'); 
             console.log(document.diagnostics);

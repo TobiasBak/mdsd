@@ -46,6 +46,10 @@ export class MultiRelationship {
         }
     }
 
+    public sqlName(): string{
+        return this.name.replaceAll(" ", "_").toLowerCase();
+    }
+
     public toString(): string {
         return this.simpleString();
     }
