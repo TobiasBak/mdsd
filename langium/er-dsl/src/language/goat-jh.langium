@@ -7,7 +7,7 @@ entry Model:
     relationship+=Relationship | 
     multirelation+=MultiRelationShip | 
     inheritance+=Inheritance | 
-    inheritanceType+=InheritanceType
+    inheritanceType+=InheritanceType 
     )*;
 
 Entity:
@@ -22,7 +22,7 @@ Attribute:
 
 Relationship:
     entities+=[Entity:ID]               
-    cardinality+=(RANGE_PATTERN | INT)  '-' cardinality+=(RANGE_PATTERN | INT)  
+    cardinality+=(RANGE_PATTERN | INT | '*')  '-' cardinality+=(RANGE_PATTERN | INT | '*')  
     entities+=[Entity:ID]
     ':' 
     // The ('is' | 'from') is needed for their lexer to allow keywords to be here
@@ -37,7 +37,7 @@ Relationship:
 MultiRelationShip:
     entities+=[Entity:ID] (('-') entities+=[Entity:ID])*
     ','
-    cardinality+=(RANGE_PATTERN | INT)  '-' cardinality+=(RANGE_PATTERN | INT) '-' cardinality+=(RANGE_PATTERN | INT) (('-') cardinality+=(RANGE_PATTERN | INT))*
+    cardinality+=(RANGE_PATTERN | INT | '*')  '-' cardinality+=(RANGE_PATTERN | INT | '*') '-' cardinality+=(RANGE_PATTERN | INT | '*') (('-') cardinality+=(RANGE_PATTERN | INT | '*'))*
     ':'
     name=INT
     (string_array+=ID+) 
@@ -78,9 +78,9 @@ Exponent infers Expression:
 
 Primary infers Expression:
     '(' Addition ')'|
-    value=INT;    
+    ({infer Integer}value=INT);    
 
-TYPES: type="char" "(" value=Expression ")" | type="varchar" "(" value=Expression ")" | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float");
+TYPES: (type="char" "(" value=Expression ")")? | (type="varchar" "(" value=Expression ")")? | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float")?;
 
 
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 
@@ -88,9 +88,11 @@ TYPES: type="char" "(" value=Expression ")" | type="varchar" "(" value=Expressio
 terminal KEYWORDS: 'PK' | 'pk' | 'FK' | 'fk' | 'Nullable' | 'nullable' | 'Derived' | 'derived' | 'Unique' | 'unique';
 
 terminal RANGE_PATTERN: 
-    ('*' | INT '..' INT | INT '..' '*');
+    (INT '..' INT | INT '..' '*');
 
-terminal INT: ('0'..'9')+;
+terminal INT returns number: ('0'..'9')+;
+//terminal TYPES: "bigint" | "boolean" | "bool" | "char(" INT ")" | "char" | "varchar(" INT ")" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float";
+
 
 
 terminal EOL: /\r?\n/;
