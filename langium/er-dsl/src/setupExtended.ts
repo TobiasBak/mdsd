@@ -1,7 +1,6 @@
 import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
 import { configureWorker, defineUserServices } from './setupCommon.js';
 
-import { generatePlantUMLImage } from './plantuml.js';
 import plantumlEncoder from 'plantuml-encoder';
 
 export const setupConfigExtended = (): UserConfig => {

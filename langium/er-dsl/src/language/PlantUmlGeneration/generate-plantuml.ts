@@ -1,15 +1,14 @@
 import { expandToNode, toString } from 'langium/generate';
-import * as fs from 'fs';
-import * as path from 'path';
 
-import { AnyOutputMetaType } from '../MetaModel/Instantiator.js';
 import { Entity } from '../MetaModel/Entity.js';
-import { Relationship, RelationshipConnection } from '../MetaModel/Relationship.js';
+import { Relationship } from '../MetaModel/Relationship.js';
 import { Attribute } from '../MetaModel/Attribute.js';
+import { InstantiatedOutput } from '../MetaModel/Instantiator.js';
+import { RelationshipConnection } from '../MetaModel/MultiRelationship.js';
 
-export function generateUMLDiagram(model: AnyOutputMetaType[]): string {
-    const entities: Entity[] = model.filter((i): i is Entity => i instanceof Entity);
-    const relationships: Relationship[] = model.filter((i): i is Relationship => i instanceof Relationship);
+export function generateUMLDiagram(model: InstantiatedOutput): string {
+    const entities: Entity[] = model.entities;
+    const relationships: Relationship[] = model.relationships;
 
     // Todo: Change the way relationships are identified, so that it says as "id" instead
     const fileNode = expandToNode`
