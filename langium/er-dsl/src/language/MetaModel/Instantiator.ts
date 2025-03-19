@@ -106,7 +106,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): AnyOu
 
     for (const rawIdentifier of model.relationshipidentifiers) {
         console.log("rawIdentifier: ", rawIdentifier);
-        const relationship = getRelationshipFromRef(rawIdentifier.identifier.ref, relationshipMap);
+        const relationship = getRelationshipFromId(rawIdentifier.identifier, relationshipMap);
         const entity = getEntityFromRef(rawIdentifier.entity.ref, entityMap);
         relationship.markAsWeak(entity);
     }
@@ -178,6 +178,14 @@ function getRelationshipFromRef(relationship: LangiumRelationship | undefined, r
     const foundRelationship = relationshipMap.get(relationshipName);
     if (foundRelationship === undefined) {
         throw new Error("Relationship not found: " + relationshipName);
+    }
+    return foundRelationship;
+}
+
+function getRelationshipFromId(id: string, relationshipMap: RelationshipMapType): Relationship {
+    const foundRelationship = relationshipMap.get(id);
+    if (foundRelationship === undefined) {
+        throw new Error("Relationship not found: " + id);
     }
     return foundRelationship;
 }

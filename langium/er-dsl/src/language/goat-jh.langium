@@ -58,7 +58,7 @@ InheritanceType:
     ;
 
 RelationShipIdentifiers:
-    entity=[Entity:ID] 'is''identified' 'by' identifier=[Relationship:INT]
+    entity=[Entity:ID] 'is''identified' 'by' identifier=INT
     EOL*
     ;
 
