@@ -16,6 +16,8 @@ export function generateSQLFile(output: InstantiatedOutput): string {
     const entitiesWithForeignKeys: ForeignKeyMap = new Map();
     const oneToOneRelationships: Relationship[] = [];
 
+    //TODO: Filter entities so they are ordered such that those with foreign keys are defined later.
+
     for (const relationship of singleDirectionRelationships) {
         const filtered = relationship.connections.filter(connection => !cardinalityIsSingular(connection.upper_cardinality, false));
 
@@ -35,14 +37,12 @@ export function generateSQLFile(output: InstantiatedOutput): string {
 
     //entities
     let entities = output.entities.map(entity => {
-        return `//Entity\nCREATE TABLE ${entity.tableName}(\n${stringAllAttributes(entity.attributes)}${generateForeignKeysIfNeeded(entity, entitiesWithForeignKeys)});`
+        const needsTrailingComma = entitiesWithForeignKeys.has(entity);
+        return `//Entity\nCREATE TABLE ${entity.tableName}(\n${stringAllAttributes(entity.attributes, needsTrailingComma)}${generateForeignKeysIfNeeded(entity, entitiesWithForeignKeys)});`
     });
 
     outputString += entities.join("\n\n");
     outputString += "\n\n";
-
-    // The ones with 1-1 should be in a separate table where foreign keys are unique not null. These tables are made after entities
-    // n-n should be parsed after entities are created
 
     //relationships
     let relationships = n_nRelationships.map(relationship => {
@@ -52,8 +52,22 @@ export function generateSQLFile(output: InstantiatedOutput): string {
             `);`
     });
 
+    //1-1 relationships
+    let oneToOneRelationshipsString = oneToOneRelationships.map(relationship => {
+        return `//1-1 relationship\nCREATE TABLE ${relationship.sqlName()}` + `(\n` +
+            `${stringAllAttributes(relationship.attributes)}` +
+            `${generateForeignKeysForRelationship(relationship)}` +
+            `);`
+    });
+
+
+    outputString += oneToOneRelationshipsString.join("\n\n");
+    outputString += "\n\n";
     outputString += relationships.join("\n\n");
     outputString += "\n\n";
+
+    //TODO: Multirelationships
+    // TODO: inheritance
 
     return outputString;
 }
@@ -66,21 +80,38 @@ function generateForeignKeysIfNeeded(entity: Entity, entitiesWithForeignKeys: Fo
     const relationships = entitiesWithForeignKeys.get(entity)!;
     const foreignKeys = relationships.map(relationship => {
         const connection = relationship.connections.find(connection => connection.entity != entity)!;
-        return generateForeignKeyToEntity(connection.entity, relationship.sqlName());
+        let output = generateForeignKeyToEntity(connection.entity, relationship.sqlName());
+        let attrs = stringAllAttributes(relationship.attributes);
+
+        if (attrs){
+            output += ",\n" + attrs;
+        }
+
+        return output;
     });
 
     return "\t" + foreignKeys.join(",\n\t") + "\n";
 }
 
-function generateForeignKeyToEntity(entity: Entity, extraname: string): string {
-    return `${extraname}_${entity.tableName}_${entity.nameOfPrimaryKey} ${entity.primaryKey.getSqlRepresentationOfDataType(true)} REFERENCES ${entity.tableName}(${entity.nameOfPrimaryKey})`;
+function generateForeignKeyToEntity(entity: Entity, extraname: string, nullable: boolean = false): string {
+    let output = `${extraname}_${entity.tableName}_${entity.nameOfPrimaryKey} ${entity.primaryKey.getSqlRepresentationOfDataType(true)} REFERENCES ${entity.tableName}(${entity.nameOfPrimaryKey})`
+
+    if (!nullable) {
+        output += " NOT NULL";
+    }
+
+    return output;
 }
 
 function generateForeignKeysForRelationship(relationship: MultiRelationship): string {
-    console.log("Generating foreign keys for relationship: ", relationship);
     const keys = relationship.connections.map(connection => {
-        const text = generateForeignKeyToEntity(connection.entity, relationship.sqlName());
-        console.log("Generated foreign key: ", text);
+        let text = generateForeignKeyToEntity(connection.entity, relationship.sqlName());
+        if (connection.lower_cardinality > 0 || connection.lower_cardinality == "*") {
+            text += " NOT NULL";
+        }
+        if (connection.upper_cardinality <= 1) {
+            text += " UNIQUE";
+        }
         return text;
     });
 
@@ -94,17 +125,18 @@ function stringSingleAttribute(attribute: Attribute): string {
     }
 
     const pk = attribute.is_primary_key ? ' PRIMARY KEY' : '';
-    const nullable = attribute.is_nullable || attribute.is_primary_key ? '' : ' NOT NULL';
+    const nullable = !attribute.is_nullable || attribute.is_primary_key ? ' NOT NULL' : '';
     const unique = attribute.is_unique && !attribute.is_primary_key ? ' UNIQUE' : '';
 
     return `${attribute.name}${datatype}${pk}${nullable}${unique}`;
 }
 
-function stringAllAttributes(attributes: Attribute[]): string {
+function stringAllAttributes(attributes: Attribute[], trailing_comma: boolean = false): string {
     if (attributes.length == 0) {
         return "";
     }
-    return "\t" + attributes.map(stringSingleAttribute).join(",\n\t") + "\n";
+    const trailing_comma_text = trailing_comma ? "," : "";
+    return "\t" + attributes.map(stringSingleAttribute).join(",\n\t") + trailing_comma_text + "\n";
 }
 
 

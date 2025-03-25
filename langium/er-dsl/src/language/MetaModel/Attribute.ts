@@ -31,7 +31,7 @@ export class Attribute{
     }
 
     public getSqlRepresentationOfDataType(forForeignKey: boolean = false): string {
-        let datatype = this.datatype ? this.datatype.name : '';
+        let datatype = this.datatype ? this.datatype.name : '<X>';
         datatype = datatype.toUpperCase();
 
         if (forForeignKey && datatype == "SERIAL") {
