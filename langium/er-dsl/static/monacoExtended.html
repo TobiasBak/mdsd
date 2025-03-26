@@ -22,6 +22,7 @@
             <p style="font-style:italic">Powered by</p>
             <img width="125" src="https://langium.org/assets/langium_logo_w_nib.svg" alt="Langium">
         </footer>
+        
         <!-- Monaco Configuration -->
         <script type="module">
             // vite is used to resolve the included TypeScript files
@@ -31,6 +32,10 @@
             configureMonacoWorkers();
             // keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
             const startingPromise = executeExtended(document.getElementById('monaco-editor-root'));
+
         </script>
+        <script src="../src/rawdeflate.js"></script>
+        <script src="../src/plantuml.js"></script>
+
     </body>
 </html>
