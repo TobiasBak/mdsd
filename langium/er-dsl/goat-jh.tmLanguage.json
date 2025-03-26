@@ -10,15 +10,19 @@
     },
     {
       "name": "keyword.control.goat-jh",
-      "match": "\\b(Inheritance|by|disjointed|from|identified|inherents|is|overlapping)\\b"
+      "match": "\\b(Inheritance|by|disjointed|from|identified|inherents|is|overlapping|inherits)\\b"
     },
     { 
       "name": "markup.bold.goat-jh",
-      "match": "\\b(string|number)\\b"
+      "match": "\\b(bigint|boolean|bool|char|varchar|date|int|real|smallint|text|uuid|time|timestamp| float)\\b"
     },
     { 
       "name": "variable.parameter.goat-jh",
-      "match": "\\b(Derived|Unique|FK|PK)\\b"
+      "match": "\\b(Derived|derived|Unique|unique|FK|PK|Nullable)\\b"
+    },
+    {
+      "name": "constant.numeric.goat-jh",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
     }
 
   ],

@@ -106,10 +106,10 @@ function generateForeignKeyToEntity(entity: Entity, extraname: string, nullable:
 function generateForeignKeysForRelationship(relationship: MultiRelationship): string {
     const keys = relationship.connections.map(connection => {
         let text = generateForeignKeyToEntity(connection.entity, relationship.sqlName());
-        if (connection.lower_cardinality > 0 || connection.lower_cardinality == "*") {
+        if (connection.lower_cardinality == "*" || connection.lower_cardinality > 0) {
             text += " NOT NULL";
-        }
-        if (connection.upper_cardinality <= 1) {
+        } 
+        if (connection.upper_cardinality != "*" && connection.upper_cardinality <= 1) {
             text += " UNIQUE";
         }
         return text;
