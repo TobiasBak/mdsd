@@ -3,6 +3,7 @@ import type {
     Attribute as LangiumAttribute,
     Entity as LangiumEntity,
     Relationship as LangiumRelationship,
+    TYPES as LangiumTYPES,
     // Inheritance as LangiumInheritance,
     // MultiRelationShip as LangiumMultiRelationShip,
 
@@ -13,6 +14,7 @@ import {Relationship} from "./Relationship.js";
 import {Cardinality, MultiRelationship, RelationshipConnection} from "./MultiRelationship.js";
 import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
 import {RelationshipAttribute} from "./RelationshipAttribute.js";
+import {leftRecursionCalculator} from "../left-recursion-calculator.js";
 
 export type InstantiatedOutput = {
     entities: Entity[],
@@ -25,7 +27,7 @@ type CardinalityRange = {
     upper: Cardinality
 }
 
-type RelationshipMapType = Map<string, Relationship>;
+type RelationshipMapType = Map<number, Relationship>;
 
 function parseCardinality(cardinality: string): Cardinality {
     if (cardinality === "*") {
@@ -35,7 +37,8 @@ function parseCardinality(cardinality: string): Cardinality {
     }
 }
 
-function extractCardinalitiesFromCardinalityArray(cardinalityArray: string[]): CardinalityRange[] {
+function extractCardinalitiesFromCardinalityArray(cardinalityArray: Array<'*' | number | string>): CardinalityRange[] {
+    //todo: fix this with the new type
     const output: CardinalityRange[] = [];
     for (let cardinality of cardinalityArray) {
         cardinality = `${cardinality}`;
@@ -72,7 +75,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
     const entityMap: Map<string, Entity> = new Map();
 
     const relationshipMap: RelationshipMapType = new Map();
-    const multiRelationshipMap: Map<string, MultiRelationship> = new Map();
+    const multiRelationshipMap: Map<number, MultiRelationship> = new Map();
 
     for (const rawEntity of model.entities) {
         const attributes: Attribute[] = [];
@@ -105,7 +108,9 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
         const attributes: Attribute[] = createAttributesForRelationship(rawRelationship.attributes);
 
         const name = rawRelationship.string_array.join(" "); // TODO: look at whether this is in fact correct
-        const relationship: Relationship = new Relationship(name, side_a, side_b, attributes, is_weak);
+        const identifier = rawRelationship.name;
+
+        const relationship: Relationship = new Relationship(name, identifier, side_a, side_b, attributes, is_weak);
 
         relationshipMap.set(rawRelationship.name, relationship);
 
@@ -113,7 +118,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
     }
 
     for (const rawIdentifier of model.relationshipidentifiers) {
-        console.log("rawIdentifier: ", rawIdentifier);
+        // console.log("rawIdentifier: ", rawIdentifier);
         const relationship = getRelationshipFromId(rawIdentifier.identifier, relationshipMap);
         const entity = getEntityFromRef(rawIdentifier.entity.ref, entityMap);
         relationship.markAsWeak(entity);
@@ -152,7 +157,8 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
 
         const attributes = createAttributesForRelationship(multiRelationship.attributes);
         const name = multiRelationship.string_array.join(" ");
-        const multiRel = new MultiRelationship(name, connections, attributes);
+        const identfier = multiRelationship.name;
+        const multiRel = new MultiRelationship(name, identfier, connections, attributes);
         multiRelationshipMap.set(multiRelationship.name, multiRel);
         //TODO: entity can be identified by multi relationship? (currently not in the language, but maybe should be)
 
@@ -190,7 +196,7 @@ function getRelationshipFromRef(relationship: LangiumRelationship | undefined, r
     return foundRelationship;
 }
 
-function getRelationshipFromId(id: string, relationshipMap: RelationshipMapType): Relationship {
+function getRelationshipFromId(id: number, relationshipMap: RelationshipMapType): Relationship {
     const foundRelationship = relationshipMap.get(id);
     if (foundRelationship === undefined) {
         throw new Error("Relationship not found: " + id);
@@ -236,26 +242,25 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
     return new Attribute(attribute.name, extractDataTypeFromLangiumType(attribute.type), is_foreign_key, is_primary_key, is_unique, is_nullable, is_derived);
 }
 
-function extractDataTypeFromLangiumType(type: string | undefined): DataType | undefined {
+function extractDataTypeFromLangiumType(type: LangiumTYPES | undefined): DataType | undefined {
     if (type === undefined) {
         return undefined;
     }
 
-    if (type.includes("(")) {
-        const typename = type.split("(")[0];
-        const value = parseInt(type.split("(")[1].replaceAll(")", ""));
+    if (type.value !== undefined) {
+        const value: number = Math.ceil(leftRecursionCalculator(type.value));
 
-        switch (typename) {
+        switch (type.type) {
             case "char":
                 return instantiateDataType("char", value);
             case "varchar":
                 return instantiateDataType("varchar", value);
             default:
-                throw new Error("Unknown type with (): '" + typename + "'");
+                throw new Error("Unknown type with (): '" + type.type + "'");
         }
     }
 
-    switch (type) {
+    switch (type.type) {
         case "bigint":
             return instantiateDataType("bigint");
         case "boolean" || "bool":

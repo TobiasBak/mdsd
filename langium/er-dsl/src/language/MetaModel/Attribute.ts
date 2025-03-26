@@ -1,4 +1,4 @@
-export type DataTypeName = "bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float";
+export type DataTypeName = "bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float" | "serial";
 
 export type DataType = {
     name: DataTypeName;
@@ -30,6 +30,20 @@ export class Attribute{
         this.is_derived = is_derived;
     }
 
+    public getSqlRepresentationOfDataType(forForeignKey: boolean = false): string {
+        let datatype = this.datatype ? this.datatype.name : '<X>';
+        datatype = datatype.toUpperCase();
+
+        if (forForeignKey && datatype == "SERIAL") {
+            return "INT";
+        }
+
+        if (this.datatype && this.datatype.value) {
+            datatype += `(${this.datatype.value})`;
+        }
+        return datatype;
+    }
+
     public toString(): string {
         return this.allStringInfo();
     }
@@ -42,6 +56,7 @@ export class Attribute{
             ${this.is_unique ? 'U' : ''}
             ${this.is_nullable ? 'N' : ''}
             ${this.is_derived ? 'D' : ''}
+            ${this.datatype && this.datatype.value ? this.datatype.value : ''}
         )\n`;
     }
 }

@@ -14,7 +14,40 @@ export const setupConfigExtended = (): UserConfig => {
             editorAppConfig: {
                 $type: 'extended',
                 languageId: 'goat-jh',
-                code: `// Jakob Hviid Notation for Data Management!\nentity(PK name varchar)\nentity2(PK id varchar, FK Derived name varchar(255))\n\nentity *-* entity2 : 1 owns (slot date)\n\nentity2 inherits from person\nInheritance from person is disjointed`,
+                code: `// Jakob Hviid Notation for Data Management!
+Student(PK id, unique exam_number int)
+Professor(PK id)
+
+Student, Professor inherits from Adult
+Inheritance from Adult is disjointed
+
+Course(PK id, name varchar, ETCS int, year int, start date, end date, room varchar(5))
+Course 1-* Student: 1 enrolls(role varchar)
+Course 1-1..2 Professor: 2 teaches
+
+External_Course(PK id, cost float)
+External_Course inherits from Course
+External_Course 1-* Human: 3 takes
+External_Course 1-1..2 Professor: 4 teaches
+
+// Multirelationship
+Supplier(PK id, name varchar)
+Project(PK id, name varchar)
+Part(PK id)
+Supplier-Part-Project, 1-1-* : 5 Supply (Quantity int)
+
+// Adding Human + kids
+Human(PK id, name varchar(20+20+40), birth_date date, derived age int, address varchar, zipcode int)
+Parent(PK id, children boolean)
+Kid(PK id, favorite_toy varchar)
+Adult(PK id, rights boolean)
+
+Parent 1-* Kid : 6 parent_of
+Kid is identified by 6
+
+Kid, Parent, Adult inherits from Human
+Inheritance from Human is overlapping
+`,
                 useDiffEditor: false,
                 extensions: [{
                     config: {
@@ -69,7 +102,7 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
         const umltext = resp.content;
         console.log('Received UML text: ', umltext);
         let encoded = plantumlEncoder.encode(umltext);
-        const imgUrl = `http://www.plantuml.com/plantuml/img/${encoded}`;
+        const imgUrl = `https://plantuml.tail46689.ts.net/img/${encoded}`;
         
         const outputElement = document.getElementById('output-plantuml');
         if (outputElement) {

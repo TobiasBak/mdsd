@@ -6,6 +6,7 @@ import { createGoatJhServices } from './goat-jh-module.js';
 import { Model } from './generated/ast.js';
 import { instantiateMetaModelFromLangiumModel } from './MetaModel/Instantiator.js';
 import { generateUMLDiagram } from './PlantUmlGeneration/generate-plantuml.js';
+import {generateSQLFile} from "./SQL/SQLGenerator.js";
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -32,6 +33,9 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, documents
         if(document.diagnostics === undefined 
             || document.diagnostics.filter((i) => i.severity === 1).length === 0
             ) {
+            console.log('No errors found, generating commands...');
+            const sql = generateSQLFile(instantiateMetaModelFromLangiumModel(model));
+            console.log("Generated sql:",sql)
 
             console.log('No errors found, generating commands...'); 
             const outModel = instantiateMetaModelFromLangiumModel(model);
