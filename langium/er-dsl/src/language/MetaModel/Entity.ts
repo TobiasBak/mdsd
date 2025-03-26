@@ -1,4 +1,4 @@
-import { Attribute } from "./Attribute.js";
+import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
 
 
 export type InheritanceType = 'disjoint' | 'overlapping';
@@ -9,11 +9,36 @@ export class Entity {
     public is_weak: boolean;
     public children: Entity[] = [];
     public inheritanceType: InheritanceType | null = null;
+    public nameOfPrimaryKey: string;
+    public primaryKey: Attribute;
+    public tableName: string;
 
     constructor(name: string, attributes: Attribute[], is_weak: boolean) {
         this.name = name;
+        this.tableName = name;
         this.attributes = attributes;
         this.is_weak = is_weak;
+
+        const pkAttr = this.generatePrimaryKeyIfNotPresent();
+        this.nameOfPrimaryKey = pkAttr.name;
+        this.primaryKey = pkAttr;
+    }
+
+    private generatePrimaryKeyIfNotPresent(): Attribute {
+        let pkAttr = this.attributes.find(attribute => attribute.is_primary_key);
+        if (!pkAttr) {
+            pkAttr = this.attributes.find(attribute => attribute.name.toLowerCase().includes("id"));
+
+            if (!pkAttr) {
+                const primaryDataType: DataType = instantiateDataType("serial");
+                pkAttr = new Attribute("id", primaryDataType, false, true);
+                this.attributes.unshift(pkAttr);
+            }else{
+                pkAttr.is_primary_key = true;
+            }
+        }
+
+        return pkAttr;
     }
 
 

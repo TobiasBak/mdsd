@@ -116,7 +116,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
     }
 
     for (const rawIdentifier of model.relationshipidentifiers) {
-        console.log("rawIdentifier: ", rawIdentifier);
+        // console.log("rawIdentifier: ", rawIdentifier);
         const relationship = getRelationshipFromId(rawIdentifier.identifier, relationshipMap);
         const entity = getEntityFromRef(rawIdentifier.entity.ref, entityMap);
         relationship.markAsWeak(entity);

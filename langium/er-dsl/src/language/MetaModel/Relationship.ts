@@ -20,6 +20,12 @@ export class Relationship extends MultiRelationship {
         throw Error("Wrong side argument provided: " + side);
     }
 
+    public hasSideWithSingularCardinality(exact: boolean = true): boolean {
+
+        return cardinalityIsSingular(this.side_a.lower_cardinality, exact) && cardinalityIsSingular(this.side_a.upper_cardinality, exact) ||
+            cardinalityIsSingular(this.side_b.lower_cardinality, exact) && cardinalityIsSingular(this.side_b.upper_cardinality, exact);
+    }
+
     public override toString(): string {
         return this.simpleString();
     }
@@ -35,4 +41,20 @@ export class Relationship extends MultiRelationship {
         result += `Relationship: ${this.name} between ${entityA.name} (${multiplicityA}) and ${entityB.name} (${multiplicityB})\n`;
         return result
     }
+}
+
+/**
+ * Returns true if the cardinality is singular. If strict is true, it will only return true if the cardinality is exactly 1.
+ * When strict is false, it will return true if the cardinality is 0 or 1.
+ * @param cardinality The input cardinality to check
+ * @param strict If true, the cardinality must be exactly 1 to return true
+ */
+export function cardinalityIsSingular(cardinality: Cardinality, strict: boolean = true): boolean {
+    if(strict){
+        return cardinality == 1;
+    }
+    if (cardinality == "*"){
+        return false;
+    }
+    return cardinality <= 1;
 }
