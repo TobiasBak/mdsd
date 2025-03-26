@@ -2,6 +2,7 @@ import { expandToNode, toString } from 'langium/generate';
 
 import { Entity } from '../MetaModel/Entity.js';
 import { Relationship } from '../MetaModel/Relationship.js';
+import { MultiRelationship } from '../MetaModel/MultiRelationship.js';
 import { Attribute } from '../MetaModel/Attribute.js';
 import { InstantiatedOutput } from '../MetaModel/Instantiator.js';
 import { RelationshipConnection } from '../MetaModel/MultiRelationship.js';
@@ -9,34 +10,47 @@ import { RelationshipConnection } from '../MetaModel/MultiRelationship.js';
 export function generateUMLDiagram(model: InstantiatedOutput): string {
     const entities: Entity[] = model.entities;
     const relationships: Relationship[] = model.relationships;
+    const multiRelationship: MultiRelationship[] = model.multiRelationships;
 
     // Todo: Change the way relationships are identified, so that it says as "id" instead
     const fileNode = expandToNode`
         @startchen
 
         ${entities.map((entity) => {
-            return `entity ${entity.name} ${entity.is_weak ? '<<weak>>' : ''} {
+        return `entity ${entity.name} ${entity.is_weak ? '<<weak>>' : ''} {
                 ${entity.attributes.map((attribute) => {
-                    return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
-                }).join('\n')}
+            return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+        }).join('\n')}
             }`;
-        }).join('\n\n')}
+    }).join('\n\n')}
 
         ${relationships.map((relationship) => {
-            return `relationship "${relationship.name}" as ${relationship.name} ${relationship.is_weak ? "<<identifying>>" : ""} {
+        return `relationship "${relationship.name}" as ${relationship.name} ${relationship.is_weak ? "<<identifying>>" : ""} {
                 ${relationship.attributes.map((attribute) => {
-                    return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
-                }).join('\n')}
+            return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+        }).join('\n')}
             }`;
-        }).join('\n\n')}
+    }).join('\n\n')}
 
         ${relationships.map((relationship) => {
-            return `
+        return `
                 ${relationship.name} -${getCardinality(relationship.side_a)}- ${relationship.side_a.entity.name} \n
                 ${relationship.name} -${getCardinality(relationship.side_b)}- ${relationship.side_b.entity.name}
             `;
-        }).join('\n\n')}
-        
+    }).join('\n\n')}
+
+        ${entities.filter(entity => entity.children.length > 0)
+            .map(entity => {
+
+                const inheritanceType = entity.inheritanceType ? entity.getAggregatedInheritanceType() : ""
+                const childrenString = entity.children.map(child => child.name).join(", ");
+
+                return `${entity.name} ->- ${inheritanceType} { ${childrenString} }`
+            }).join('\n\n')
+        }
+
+        ${`${multiRelationship}`}
+
         @endchen
     `.appendNewLineIfNotEmpty();
     // TODO: Inheritance + multi relationships
@@ -53,7 +67,7 @@ function generateKeyword(attribute: Attribute): string {
     if (attribute.is_primary_key) {
         out += '<<key>> ';
     }
-    
+
     //if (attribute.is_foreign_key) {
     //    out += '<<FK>> ';
     //}
@@ -72,22 +86,22 @@ function generateKeyword(attribute: Attribute): string {
 }
 
 function getDataTypeString(attribute: Attribute): string {
-    if (attribute.datatype?.value != undefined){
+    if (attribute.datatype?.value != undefined) {
         return `${attribute.datatype.name} ${attribute.datatype.value}`;
     }
     return `${attribute.datatype?.name}`;
 }
 
 function getCardinality(side: RelationshipConnection): string {
-    if (side.lower_cardinality == side.upper_cardinality){
+    if (side.lower_cardinality == side.upper_cardinality) {
         return `${convertAsteriskToN(side.lower_cardinality)}`;
-    }else {
+    } else {
         return `(${convertAsteriskToN(side.lower_cardinality)},${convertAsteriskToN(side.upper_cardinality)})`;
     }
 }
 
 function convertAsteriskToN(cardinality: number | "*"): string | number {
-    if (cardinality == "*"){
+    if (cardinality == "*") {
         return "n";
     }
     return cardinality;

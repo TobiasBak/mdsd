@@ -59,13 +59,16 @@ export class MultiRelationship {
 
     simpleString(): string { // TODO: fix this for multi relationships
         let result: string = '';
+
         const { entity: entityA } = this.connections[0];
         const { entity: entityB } = this.connections[1];
 
         const multiplicityA = `${this.connections[0].lower_cardinality}..${this.connections[0].upper_cardinality}`;
         const multiplicityB = `${this.connections[1].lower_cardinality}..${this.connections[1].upper_cardinality}`;
 
-        result += `Relationship: ${this.name} between ${entityA.name} (${multiplicityA}) and ${entityB.name} (${multiplicityB})\n`;
+        result += `relationship: "${this.name}" as ${this.name} { }
+        \n
+        ${this.name} -${this.connections[0].lower_cardinality}- ${entityB.name}`;
         return result
     }
 }
