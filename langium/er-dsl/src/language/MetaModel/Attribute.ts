@@ -42,6 +42,7 @@ export class Attribute{
             ${this.is_unique ? 'U' : ''}
             ${this.is_nullable ? 'N' : ''}
             ${this.is_derived ? 'D' : ''}
+            ${this.datatype && this.datatype.value ? this.datatype.value : ''}
         )\n`;
     }
 }
