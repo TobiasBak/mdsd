@@ -42,6 +42,19 @@ export class Entity {
     }
 
 
+    public getAggregatedInheritanceType(): string{
+        let result: string = ""
+            if (this.inheritanceType == "disjoint"){
+                result = "d";
+            }
+            if (this.inheritanceType == "overlapping"){
+                result = "o";
+            }
+        return result
+        }
+    
+
+
     public markAsWeak(): void {
         this.is_weak = true;
     }
@@ -51,22 +64,10 @@ export class Entity {
     }
 
     public setInheritanceType(type: InheritanceType): void {
-        if (this.hasExplicitInheritance) {
+        if (this.inheritanceType != null) {
             throw new Error(`Cannot set inheritance type to '${type}' because it is already set to '${this.inheritanceType}'`);
         }
-        this.hasExplicitInheritance = true;
         this.inheritanceType = type;
-    }
-
-    public getAggregatedInheritanceType(): string{
-    let result: string = ""
-        if (this.inheritanceType == "disjoint"){
-            result = "d";
-        }
-        if (this.inheritanceType == "overlapping"){
-            result = "o";
-        }
-    return result
     }
 
     public toString(): string {
