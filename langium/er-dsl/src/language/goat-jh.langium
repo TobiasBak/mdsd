@@ -67,6 +67,8 @@ interface Expression {
     left: Expression;
     operator: string;
     right: Expression;
+    value: number;
+    expression: Expression;
 }
 
 Exp returns Expression: Addition_Subtraction;
