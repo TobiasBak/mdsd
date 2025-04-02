@@ -53,9 +53,36 @@ export class MultiRelationship {
     }
 
     public toString(): string {
-        return this.simpleString();
+        return this.toPlantUML();
+    }
+    
+    //parse cardinality * -> N 
+    aggregateCardinality(cardinality: Cardinality): string {
+        if (cardinality == "*"){
+            return "N";
+        }
+        return cardinality.toString();
     }
 
+    toPlantUML(): string {
+        let result: string = '';
+
+        
+        result += `relationship "${this.name}" as ${this.identifier} { 
+        }
+        \n`
+
+        for (const connection of this.connections) {
+            const { entity, lower_cardinality, upper_cardinality, identifies } = connection;
+            let cardinality = lower_cardinality === upper_cardinality 
+            ? lower_cardinality
+            : `${lower_cardinality}..${upper_cardinality}`;
+            
+            result += `\n${entity.name} \-${this.aggregateCardinality(cardinality as Cardinality)}\- ${this.identifier}`;
+        }
+
+        return result
+    }
 
     simpleString(): string { // TODO: fix this for multi relationships
         let result: string = '';
@@ -66,7 +93,8 @@ export class MultiRelationship {
         const multiplicityA = `${this.connections[0].lower_cardinality}..${this.connections[0].upper_cardinality}`;
         const multiplicityB = `${this.connections[1].lower_cardinality}..${this.connections[1].upper_cardinality}`;
 
-        result += `relationship: "${this.name}" as ${this.name} { }
+        result += `relationship "${this.name}" as ${this.identifier} { 
+        }
         \n
         ${this.name} -${this.connections[0].lower_cardinality}- ${entityB.name}`;
         return result

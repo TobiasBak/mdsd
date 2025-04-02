@@ -102,7 +102,7 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
         const umltext = resp.content;
         console.log('Received UML text: ', umltext);
         let encoded = plantumlEncoder.encode(umltext);
-        const imgUrl = `https://plantuml.tail46689.ts.net/img/${encoded}`;
+        const imgUrl = `http://plantuml.thorj.dk/img/${encoded}`;
         
         const outputElement = document.getElementById('output-plantuml');
         if (outputElement) {
