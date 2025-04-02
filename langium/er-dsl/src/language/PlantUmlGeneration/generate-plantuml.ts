@@ -48,7 +48,7 @@ export function generateUMLDiagram(model: InstantiatedOutput): string {
 
 function generateKeyword(attribute: Attribute): string {
     let out = ' ';
-    console.log(attribute);
+    // console.log(attribute);
 
     if (attribute.is_primary_key) {
         out += '<<key>> ';
