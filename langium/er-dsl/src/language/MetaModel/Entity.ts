@@ -1,4 +1,5 @@
 import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
+import {ForeignPKAttribute} from "./ForeignPKAttribute.js";
 
 
 export type InheritanceType = 'disjoint' | 'overlapping';
@@ -9,22 +10,41 @@ export class Entity {
     public is_weak: boolean;
     public children: Entity[] = [];
     public inheritanceType: InheritanceType | null = null;
-    public nameOfPrimaryKey: string;
-    public primaryKey: Attribute;
+    private primaryKey: Attribute | null = null;
     public tableName: string;
+
+    public parent: Entity | null = null;
 
     constructor(name: string, attributes: Attribute[], is_weak: boolean) {
         this.name = name;
         this.tableName = name;
         this.attributes = attributes;
         this.is_weak = is_weak;
+    }
 
-        const pkAttr = this.generatePrimaryKeyIfNotPresent();
-        this.nameOfPrimaryKey = pkAttr.name;
-        this.primaryKey = pkAttr;
+    public setParent(parent: Entity): void {
+        this.parent = parent;
+        this.primaryKey = this.generatePrimaryKeyIfNotPresent();
+    }
+
+    public getPrimaryKey(): Attribute {
+        if (this.primaryKey == null) {
+            this.primaryKey = this.generatePrimaryKeyIfNotPresent();
+        }
+        if (this.primaryKey == null) {
+            throw new Error(`Primary key is still null after generation: Entity ${this}`);
+        }
+
+        return this.primaryKey;
     }
 
     private generatePrimaryKeyIfNotPresent(): Attribute {
+        if (this.parent != null) {
+            const pkAttr = new ForeignPKAttribute(this.parent);
+            this.attributes.unshift(pkAttr);
+            return pkAttr;
+        }
+
         let pkAttr = this.attributes.find(attribute => attribute.is_primary_key);
         if (!pkAttr) {
             pkAttr = this.attributes.find(attribute => attribute.name.toLowerCase().includes("id"));
@@ -78,11 +98,11 @@ export class Entity {
 
         const attributeString = "[" + this.attributes.map(attr => attr.toString()).join('; ') + ']';
 
-        out += `Entity: ${this.name} (
-            ${this.is_weak ? 'weak' : ''}
-            ${this.inheritanceType ? this.inheritanceType : ''}
-            ${attributeString}
-        )\n`;
+        out += `Entity: ${this.name} (` +
+            `${this.is_weak ? 'weak ' : ''}` +
+            `${this.inheritanceType ? this.inheritanceType + " " : ''}` +
+            `${attributeString}` +
+            `)`;
 
 
         return out;
