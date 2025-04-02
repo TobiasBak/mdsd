@@ -14,31 +14,40 @@ export const setupConfigExtended = (): UserConfig => {
             editorAppConfig: {
                 $type: 'extended',
                 languageId: 'goat-jh',
-                code: `// Jakob Hviid Notation for Data Management!\n
-Author(PK unique id char(50), lol varchar)
-Test(unique idTest char(50), lolTest varchar)
-Goated(id)
-LOL(id)
+                code: `// Jakob Hviid Notation for Data Management!
+Student(PK id, unique exam_number int)
+Professor(PK id)
 
-Project(name, description, startDate, endDate)
-Employee(id, name, address, phone, email, startDate, endDate)
+Student, Professor inherits from Adult
+Inheritance from Adult is disjointed
 
-Employee *-* Project : 4 works on
+Course(PK id, name varchar, ETCS int, year int, start date, end date, room varchar(5))
+Course 1-* Student: 1 enrolls(role varchar)
+Course 1-1..2 Professor: 2 teaches
 
+External_Course(PK id, cost float)
+External_Course inherits from Course
+External_Course 1-* Human: 3 takes
+External_Course 1-1..2 Professor: 4 teaches
 
-Author *-1 Test : 1 is owned (Goated int)
+// Multirelationship
+Supplier(PK id, name varchar)
+Project(PK id, name varchar)
+Part(PK id)
+Supplier-Part-Project, 1-1-* : 5 Supply (Quantity int)
 
-Author - Goated - LOL, *-*-* : 2 makes gooated (goated int)
+// Adding Human + kids
+Human(PK id, name varchar(20+20+40), birth_date date, derived age int, address varchar, zipcode int)
+Parent(PK id, children boolean)
+Kid(PK id, favorite_toy varchar)
+Adult(PK id, rights boolean)
 
-Goated 1-1 LOL : 3 contributes to ()
+Parent 1-* Kid : 6 parent_of
+Kid is identified by 6
 
-Goated, LOL inherits from Author
-
-Inheritance from Goated is disjointed
-
-Inheritance from Author is overlapping 
-
-Author is identified by 1`,
+Kid, Parent, Adult inherits from Human
+Inheritance from Human is overlapping
+`,
                 useDiffEditor: false,
                 extensions: [{
                     config: {
@@ -93,7 +102,7 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
         const umltext = resp.content;
         // console.log('Received UML text: ', umltext);
         let encoded = plantumlEncoder.encode(umltext);
-        const imgUrl = `http://www.plantuml.com/plantuml/img/${encoded}`;
+        const imgUrl = `https://plantuml.tail46689.ts.net/img/${encoded}`;
         
         const outputElement = document.getElementById('output-plantuml');
         if (outputElement) {

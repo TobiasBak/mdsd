@@ -5,8 +5,8 @@ export class Relationship extends MultiRelationship {
     public side_a: RelationshipConnection;
     public side_b: RelationshipConnection;
 
-    constructor(name: string, side_a: RelationshipConnection, side_b: RelationshipConnection, attributes: RelationshipAttribute[], is_weak: boolean = false) {
-        super(name, [side_a, side_b], attributes, is_weak);
+    constructor(name: string, identifier: number, side_a: RelationshipConnection, side_b: RelationshipConnection, attributes: RelationshipAttribute[], is_weak: boolean = false) {
+        super(name, identifier, [side_a, side_b], attributes, is_weak);
         this.side_a = side_a;
         this.side_b = side_b;
     }

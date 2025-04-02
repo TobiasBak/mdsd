@@ -16,14 +16,16 @@ export type RelationshipConnection = {
 
 export class MultiRelationship {
     public name: string;
+    public identifier: number;
     public connections: RelationshipConnection[];
     public is_weak: boolean;
     public attributes: RelationshipAttribute[];
 
     entityMap: Map<Entity, RelationshipConnection>;
 
-    constructor(name: string, connections: RelationshipConnection[], attributes: RelationshipAttribute[], is_weak: boolean = false) {
+    constructor(name: string, identifier: number, connections: RelationshipConnection[], attributes: RelationshipAttribute[], is_weak: boolean = false) {
         this.name = name;
+        this.identifier = identifier;
         this.connections = connections;
         this.is_weak = is_weak;
         this.attributes = attributes;

@@ -108,7 +108,9 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
         const attributes: Attribute[] = createAttributesForRelationship(rawRelationship.attributes);
 
         const name = rawRelationship.string_array.join(" "); // TODO: look at whether this is in fact correct
-        const relationship: Relationship = new Relationship(name, side_a, side_b, attributes, is_weak);
+        const identifier = rawRelationship.name;
+
+        const relationship: Relationship = new Relationship(name, identifier, side_a, side_b, attributes, is_weak);
 
         relationshipMap.set(rawRelationship.name, relationship);
 
@@ -155,7 +157,8 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
 
         const attributes = createAttributesForRelationship(multiRelationship.attributes);
         const name = multiRelationship.string_array.join(" ");
-        const multiRel = new MultiRelationship(name, connections, attributes);
+        const identfier = multiRelationship.name;
+        const multiRel = new MultiRelationship(name, identfier, connections, attributes);
         multiRelationshipMap.set(multiRelationship.name, multiRel);
         //TODO: entity can be identified by multi relationship? (currently not in the language, but maybe should be)
 
