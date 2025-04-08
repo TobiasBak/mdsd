@@ -36,7 +36,7 @@ We need to support serial in the language as well
 3. Softvalidator (diagram is generated) but it suggest that datatypes should be on each attribute, because sql needs it.   
 4. Check if varchar number is between 0 and 255 
 
-**PERSON_X:**       
+**KEVIN**       
 1. Check if RelationshipIdentifier is using a valid int (It is valid if a relationship exists that has that int as its identifier)
 2. Check if Relationships have unique identifiers.
 3. Check if an entity is a part of the relationship, if a user writes (entity is identified by <relationship_identifier>)
@@ -58,7 +58,7 @@ We need to support serial in the language as well
 
 **PERSON_Y:** Make it impossible to define attributes on entities, which are already defined by its parent (using scoping)
 
-**PERSON_Z:** Make it possible to overwrite attribute types for inherited attributes using: "<entity> overwrite type <attribute> <type>
+**KEVIN:** Make it possible to overwrite attribute types for inherited attributes using: "<entity> overwrite type <attribute> <type>
 
 **TOBIAS:** Make it possible to remove an inherinted attribute from an entity: "remove attribute <attribute> from <entity>
 
