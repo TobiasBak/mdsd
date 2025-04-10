@@ -2,13 +2,15 @@ import { type Module, inject } from 'langium';
 import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
 import { GoatJHGeneratedModule, GoatJhGeneratedSharedModule } from './generated/module.js';
 import { GoatJhValidator, registerValidationChecks } from './goat-jh-validator.js';
+import {registerThorValidation, ThorValidator} from "./thor-validator.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
  */
 export type GoatJhAddedServices = {
     validation: {
-        GoatJhValidator: GoatJhValidator
+        GoatJhValidator: GoatJhValidator,
+        ThorValidator: ThorValidator
     }
 }
 
@@ -25,7 +27,8 @@ export type GoatJhServices = LangiumServices & GoatJhAddedServices
  */
 export const GoatJhModule: Module<GoatJhServices, PartialLangiumServices & GoatJhAddedServices> = {
     validation: {
-        GoatJhValidator: () => new GoatJhValidator()
+        GoatJhValidator: () => new GoatJhValidator(),
+        ThorValidator: () => new ThorValidator(),
     }
 };
 
@@ -59,6 +62,7 @@ export function createGoatJhServices(context: DefaultSharedModuleContext): {
     );
     shared.ServiceRegistry.register(GoatJh);
     registerValidationChecks(GoatJh);
+    registerThorValidation(GoatJh);
     if (!context.connection) {
         // We don't run inside a language server
         // Therefore, initialize the configuration provider instantly

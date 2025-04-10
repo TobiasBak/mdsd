@@ -35,7 +35,7 @@ shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Validated, documents
             ) {
             console.log('No errors found, generating commands...');
             const sql = generateSQLFile(instantiateMetaModelFromLangiumModel(model));
-            console.log("Generated sql:",sql)
+            // console.log("Generated sql:",sql)
 
             console.log('No errors found, generating commands...'); 
             const outModel = instantiateMetaModelFromLangiumModel(model);
