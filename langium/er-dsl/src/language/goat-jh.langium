@@ -88,7 +88,7 @@ Primary returns Expression:
     '(' Exp ')'|
     ({infer Integer}value=INT);    
 
-TYPES: (type="char" "(" value=Exp ")")? | (type="varchar" "(" value=Exp ")")? | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float")?;
+TYPES: (type="char" "(" value=Exp ")")? | (type="varchar" "(" value=Exp ")")? | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float" | "serial")?;
 
 
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 
@@ -99,7 +99,7 @@ terminal RANGE_PATTERN:
     (INT '..' INT | INT '..' '*');
 
 terminal INT returns number: ('0'..'9')+;
-//terminal TYPES: "bigint" | "boolean" | "bool" | "char(" INT ")" | "char" | "varchar(" INT ")" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float";
+//terminal TYPES: "bigint" | "boolean" | "bool" | "char(" INT ")" | "char" | "varchar(" INT ")" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float" | "serial";
 
 
 

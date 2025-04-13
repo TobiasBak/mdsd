@@ -287,6 +287,8 @@ function extractDataTypeFromLangiumType(type: LangiumTYPES | undefined): DataTyp
             return instantiateDataType("timestamp");
         case "float":
             return instantiateDataType("float");
+        case "serial":
+            return instantiateDataType("serial");
         default:
             throw new Error("Unknown type: " + type);
 
