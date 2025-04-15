@@ -47,6 +47,15 @@ Kid is identified by 6
 
 Kid, Parent, Adult inherits from Human
 Inheritance from Human is overlapping
+
+Human inherits from Student
+
+A()
+B()
+
+A inherits from B
+B inherits from A
+
 `,
                 useDiffEditor: false,
                 extensions: [{

@@ -3,6 +3,8 @@ import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModul
 import { GoatJHGeneratedModule, GoatJhGeneratedSharedModule } from './generated/module.js';
 import { GoatJhValidator, registerValidationChecks } from './goat-jh-validator.js';
 import {registerThorValidation, ThorValidator} from "./thor-validator.js";
+import {ThorScopeProvider} from "./ThorScopeProvider.js";
+import {ThorScopeComputation} from "./ThorScopeComputation.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -29,6 +31,10 @@ export const GoatJhModule: Module<GoatJhServices, PartialLangiumServices & GoatJ
     validation: {
         GoatJhValidator: () => new GoatJhValidator(),
         ThorValidator: () => new ThorValidator(),
+    },
+    references: {
+        ScopeProvider: (services) => new ThorScopeProvider(services),
+        ScopeComputation: (services) => new ThorScopeComputation(services),
     }
 };
 

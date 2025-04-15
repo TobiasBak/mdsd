@@ -18,15 +18,8 @@ kanban
 
 ```
 
-## Added features
-- Validator to ensure entities have a singular parent.
-
 ## Housekeeping
 Before we are done we should change the option `noUnusedLocals` back to `true` in `tsconfig.json`.
-
-## More types
-We need to support serial in the language as well
-
 
 
 # Validation tasks:     
@@ -56,7 +49,9 @@ We need to support serial in the language as well
 # Scoping tasks:       
 **Rasmus:** Make it possible to write: "<entity> requires <attribute> <boolean_operator> equation
 
-**Thor:** Make it impossible to define attributes on entities, which are already defined by its parent (using scoping)
+**Thor:** 
+- Ensure no circular inheritance using scoping.
+- Ensure no duplicate attributes defined in children.
 
 **KEVIN:** Make it possible to overwrite attribute types for inherited attributes using: "<entity> overwrite type <attribute> <type>
 
@@ -64,28 +59,6 @@ We need to support serial in the language as well
 
 
 # Testing tasks:
-- Test that models are instantiated correctly (into the langium model)
-  - Base models
-    - Attributes
-      - Types
-      - Constraints
-      - Default values?
-  - Relationships
-  - Inheritance
-- Test that models are validated correctly (at the langium level)
-  - Base models
-    - Attributes
-      - Types
-      - Constraints
-      - Default values?
-  - Relationships
-  - Inheritance
-- Test SQL generation
-  - Run the generated SQL code towards a postgres db
-    - Verify that the expected tables are present in the db
-- Test PlantUML generation
-  - Check only for validity against a puml server
-- Test scoping
-  - ?
+Each individual tests the features they implement for scoping and validation.
 
 
