@@ -1,5 +1,3 @@
-
-
 import {DefaultScopeComputation} from "langium";
 
 import type { AstNode } from 'langium';
@@ -8,7 +6,9 @@ import {isAttribute, isEntity, isModel} from "./generated/ast.js";
 
 export class ThorScopeComputation extends DefaultScopeComputation {
     private children: Map<AstNode, AstNode[]> = new Map();
-    private processedInheritance: boolean = false;
+    private lastProcessedDocumentVersion: number = -1;
+
+
 
     /**
      * Process a single node during scopes computation. The default implementation makes the node visible
@@ -16,10 +16,11 @@ export class ThorScopeComputation extends DefaultScopeComputation {
      * e.g. by increasing the visibility to a higher level in the AST.
      */
     protected processNode(node: AstNode, document: LangiumDocument, scopes: PrecomputedScopes): void {
-        if (!this.processedInheritance){
-            this.processedInheritance = true;
+        const currentVersion = document.textDocument._version;
+        if (currentVersion !== this.lastProcessedDocumentVersion){
+            this.lastProcessedDocumentVersion = currentVersion;
             this.processInheritance(document);
-            //console.log(this.children);
+            console.error("process inheritance")
         }
 
         const container = node.$container;
@@ -46,6 +47,10 @@ export class ThorScopeComputation extends DefaultScopeComputation {
         }
         for (const child of children) {
             scopes.add(child, this.descriptions.createDescription(node, name, document));
+            // TODO: Expand this to add the children of the children as well.
+            // Consider circular inheritance? how do we avoid dying in a loop?
+            // Perhaps extracting the functionality from the circular validator could help to stop early.
+            // It is necessary because this runs before validation. As such validation cant throw error before this runs.
         }
     }
 

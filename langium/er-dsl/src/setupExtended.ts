@@ -48,13 +48,16 @@ Kid is identified by 6
 Kid, Parent, Adult inherits from Human
 Inheritance from Human is overlapping
 
-Human inherits from Student
+//Human inherits from Student
 
 A()
 B()
+C()
 
-A inherits from B
-B inherits from A
+C, A inherits from B
+//B inherits from A
+
+Inheritance from B is disjointed
 
 `,
                 useDiffEditor: false,

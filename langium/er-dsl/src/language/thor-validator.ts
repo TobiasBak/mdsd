@@ -1,7 +1,8 @@
-import type {ValidationChecks, ValidationAcceptor} from 'langium';
+import type {ValidationChecks, ValidationAcceptor, DiagnosticInfo} from 'langium';
 import type {Attribute, Entity, GoatJhAstType, Inheritance, InheritanceType, Model} from './generated/ast.js';
 import type {GoatJhServices} from './goat-jh-module.js';
 import {DiagnosticRelatedInformation} from "vscode-languageserver-types";
+import {isNull} from "node:util";
 
 /**
  * Register custom validation checks.
@@ -78,48 +79,87 @@ export class ThorValidator {
         this.singleChildrenNoInheritanceType(childCounts, entitiesWithSpecifiedInheritanceTypes, inheritanceTypeForEntity, accept);
 
 
+        this.noCircularInheritance(parents, inheritancesFromEntity, accept);
+    }
+
+
+    private noCircularInheritance(parents: Map<Entity, Entity>, inheritancesFromEntity: Map<Entity, Inheritance[]>, accept: ValidationAcceptor) {
         const checkedEntitiesForCircularInheritance: Set<Entity> = new Set();
+
         parents.forEach((parent, child) => {
-            let current: Entity |undefined = parent;
-            //checkedEntitiesForCircularInheritance.add(child)
+            let current: Entity | undefined = parent;
 
-            while (current && !checkedEntitiesForCircularInheritance.has(current)) {
-                checkedEntitiesForCircularInheritance.add(current)
+            const loopStorage: Array<Entity> = [];
+            const localVisits: Set<Entity> = new Set();
 
-                if (current == child) {
+            while (current) {
+                if (localVisits.has(current)) {
                     // Circular inheritance detected
-                    console.error("Circular inheritance detected", child, parent, current);
+                    const startingIndex = loopStorage.indexOf(current);
+                    const diagnostics: DiagnosticInfo<Inheritance | undefined>[] = []
+                    const loopEntityNames: string[] = []
 
-                    const inheritanceWithRightChild = inheritancesFromEntity.get(parent)?.find((inheritance) => {
-                        return inheritance.children.some((inheritanceChild) => {
-                            return inheritanceChild.ref == child;
-                        })
-                    })
-                    console.log(inheritanceWithRightChild)
+                    for (let i = startingIndex; i < loopStorage.length; i++) {
+                        const localChild = loopStorage[i];
+                        const parentIndex = i + 1 < loopStorage.length ? i + 1 : startingIndex;
+                        const localParent = loopStorage[parentIndex];
 
-                    accept("error", 'Circular inheritance detected.', {
-                        node: inheritanceWithRightChild,
-                        property: "parent",
-                    })
-                    accept("error", 'Circular inheritance detected.', {
-                        node: inheritanceWithRightChild,
-                        property: "children",
-                    })
-                    // TODO: Throw this error on every entity involved in the circle. Consider adding an id, in case of multiple circles.
-                    // This requires adding a datastructure to track the circles.
+                        diagnostics.push(...this.errorOnInheritance(inheritancesFromEntity, localParent, localChild, accept));
+                        loopEntityNames.push(localChild.name)
+                    }
+
+                    loopEntityNames.push(loopEntityNames[0])
+                    const loopString = loopEntityNames.join(" -> ")
+                    for (const diagnostic of diagnostics) {
+                        accept("error", 'Circular inheritance detected: ' + loopString, diagnostic)
+                    }
+
                     return;
-                }else {
-                    console.log("These differ: ", child, parent, current)
                 }
+
+                loopStorage.push(current);
+
+                if (checkedEntitiesForCircularInheritance.has(current)) { // Skip for optimization
+                    break;
+                }
+                localVisits.add(current)
+                checkedEntitiesForCircularInheritance.add(current)
 
                 current = parents.get(current);
             }
 
         })
-
-        console.log("checked all entites", checkedEntitiesForCircularInheritance)
     }
 
+    private errorOnInheritance(inheritancesFromEntity: Map<Entity, Inheritance[]>, parent: Entity, child: Entity, accept: ValidationAcceptor) {
+        const temp = this.getInheritanceBetweenEntities(inheritancesFromEntity, parent, child);
+        const inheritanceWithRightChild = temp.inheritance
+        const childIndex = temp.childIndex
+
+        const parentDiagnostic: DiagnosticInfo<Inheritance | undefined> = {
+            node: inheritanceWithRightChild,
+            property: "parent",
+        }
+
+        const childDiagnostic: DiagnosticInfo<Inheritance | undefined> = {
+            node: inheritanceWithRightChild,
+            property: "children",
+            index: childIndex
+        }
+
+        return [parentDiagnostic, childDiagnostic]
+    }
+
+    private getInheritanceBetweenEntities(inheritancesFromEntity: Map<Entity, Inheritance[]>, parent: Entity, child: Entity): {inheritance: Inheritance | undefined, childIndex: number} {
+        const inheritanceWithRightChild = inheritancesFromEntity.get(parent)?.find((inheritance) => {
+            return inheritance.children.some((inheritanceChild) => {
+                return inheritanceChild.ref == child;
+            })
+        })
+
+        const childIndex = inheritanceWithRightChild.children.findIndex((childLoop) => childLoop.ref === child);
+        return {inheritance: inheritanceWithRightChild, childIndex: childIndex};
+    }
 
     private inheritanceTypeOnlyAllowedWithChildren(model: Model, entitiesWithSpecifiedInheritanceTypes: Set<Entity>, inheritanceTypeForEntity: Map<Entity, InheritanceType>, childCounts: Map<Entity, number>, accept: ValidationAcceptor) {
         model.inheritanceType.forEach((inheritanceType) => {
@@ -181,14 +221,34 @@ export class ThorValidator {
 
     noDuplicateAttributes(entity: Entity, accept: ValidationAcceptor): void {
         const attributesSeen = new Set<string>();
+
+        const precomputedScope = entity.$container.$document?.precomputedScopes.get(entity)
+        const precomputedAttributeCounts: Map<string, number> = new Map();
+        precomputedScope.forEach((scope) => {
+            precomputedAttributeCounts.set(scope.name, precomputedAttributeCounts.get(scope.name) + 1 || 1);
+        })
+
+        //console.log(entity, precomputedScope)
+
         entity.attributes.forEach((attribute) => {
             const attributeName = attribute.name;
             if (attributesSeen.has(attributeName)) {
                 accept('error', 'Duplicate attribute name found.', {node: attribute, property: 'name'});
-            } else {
-                attributesSeen.add(attributeName);
+            }else if(precomputedAttributeCounts.get(attributeName) > 1){
+                const parentWithAttribute = precomputedScope?.filter((scope) => scope.name === attributeName).map((scope) => scope.node.$container).find((container) => container != entity)
+                let parentText = "parent chain"
+                if (parentWithAttribute.$type == "Entity"){
+                    const castedParent: Entity = parentWithAttribute as Entity;
+                    parentText = castedParent.name
+                }
+                console.warn(entity, precomputedScope)
+                // this assumes that the precomputed scopes will always add the parent scopes first.
+                // This seems to be the case
+                accept('error', `Duplicate attribute name found. Inherited from ${parentText}.`, {node: attribute, property: 'name'});
             }
+            attributesSeen.add(attributeName);
         });
+        //console.log(entity)
     }
 }
         
