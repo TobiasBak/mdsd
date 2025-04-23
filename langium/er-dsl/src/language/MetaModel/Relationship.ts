@@ -1,5 +1,6 @@
-import {MultiRelationship, RelationshipConnection, side, Cardinality} from "./MultiRelationship.js";
-import {RelationshipAttribute} from "./RelationshipAttribute.js";
+import { MultiRelationship, RelationshipConnection, side, Cardinality } from "./MultiRelationship.js";
+import { RelationshipAttribute } from "./RelationshipAttribute.js";
+import { getDataTypeString, generateKeyword } from "../PlantUmlGeneration/plantuml-utils.js";
 
 export class Relationship extends MultiRelationship {
     public side_a: RelationshipConnection;
@@ -12,9 +13,9 @@ export class Relationship extends MultiRelationship {
     }
 
     public hasRangedCardinality(side: side): boolean {
-        if (side == "a"){
+        if (side == "a") {
             return this.side_a.lower_cardinality != this.side_a.upper_cardinality;
-        }else if (side == "b"){
+        } else if (side == "b") {
             return this.side_b.lower_cardinality != this.side_b.upper_cardinality;
         }
         throw Error("Wrong side argument provided: " + side);
@@ -30,15 +31,13 @@ export class Relationship extends MultiRelationship {
         return this.simpleString();
     }
 
-    public toPlantUMLWithAttribute(
-        getDataTypeString: (attribute: RelationshipAttribute) => string,
-        generateKeyword: (attribute: RelationshipAttribute) => string
-    ): string {
+    public toPlantUMLWithAttribute(): string {
         let result: string = "";
+        
         result = `relationship "${this.name}" as ${this.name} ${this.is_weak ? "<<identifying>>" : ""} {
             ${this.attributes.map((attribute) => {
-                return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
-            }).join('\n')}
+            return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+        }).join('\n')}
         }`;
 
         return result;
@@ -64,15 +63,15 @@ export class Relationship extends MultiRelationship {
 }
 
 function getCardinality(side: RelationshipConnection): string {
-    if (side.lower_cardinality == side.upper_cardinality){
+    if (side.lower_cardinality == side.upper_cardinality) {
         return `${convertAsteriskToN(side.lower_cardinality)}`;
-    }else {
+    } else {
         return `(${convertAsteriskToN(side.lower_cardinality)},${convertAsteriskToN(side.upper_cardinality)})`;
     }
 }
 
 function convertAsteriskToN(cardinality: number | "*"): string | number {
-    if (cardinality == "*"){
+    if (cardinality == "*") {
         return "n";
     }
     return cardinality;
@@ -86,10 +85,10 @@ function convertAsteriskToN(cardinality: number | "*"): string | number {
  */
 
 export function cardinalityIsSingular(cardinality: Cardinality, strict: boolean = true): boolean {
-    if(strict){
+    if (strict) {
         return cardinality == 1;
     }
-    if (cardinality == "*"){
+    if (cardinality == "*") {
         return false;
     }
     return cardinality <= 1;

@@ -9,12 +9,12 @@ import type {
 
 } from '../generated/ast.js';
 
-import {Entity} from './Entity.js';
-import {Relationship} from "./Relationship.js";
-import {Cardinality, MultiRelationship, RelationshipConnection} from "./MultiRelationship.js";
-import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
-import {RelationshipAttribute} from "./RelationshipAttribute.js";
-import {leftRecursionCalculator} from "../left-recursion-calculator.js";
+import { Entity } from './Entity.js';
+import { Relationship } from "./Relationship.js";
+import { Cardinality, MultiRelationship, RelationshipConnection } from "./MultiRelationship.js";
+import { Attribute, DataType, instantiateDataType } from "./Attribute.js";
+import { RelationshipAttribute } from "./RelationshipAttribute.js";
+import { leftRecursionCalculator } from "../left-recursion-calculator.js";
 
 export type InstantiatedOutput = {
     entities: Entity[],
@@ -46,10 +46,10 @@ function extractCardinalitiesFromCardinalityArray(cardinalityArray: Array<'*' | 
         if (cardinalities.length == 1) {
             cardinalities.push(cardinalities[0]);
         }
-        output.push({lower: parseCardinality(cardinalities[0]), upper: parseCardinality(cardinalities[1])});
+        output.push({ lower: parseCardinality(cardinalities[0]), upper: parseCardinality(cardinalities[1]) });
     }
 
-    if (output.length < 2){
+    if (output.length < 2) {
         throw new Error(`Cardinality array from '${cardinalityArray}' must have at least 2 elements, but has ${output.length}`);
     }
 
@@ -125,7 +125,7 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
     }
 
 
-    for ( const inheritance of model.inheritance) {
+    for (const inheritance of model.inheritance) {
         const parentEntity = getEntityFromRef(inheritance.parent.ref, entityMap);
         for (const child of inheritance.children) {
             const childEntity = getEntityFromRef(child.ref, entityMap);
@@ -133,26 +133,26 @@ export function instantiateMetaModelFromLangiumModel(model: LangiumModel): Insta
         }
     }
 
-    for (const inheritanceType of model.inheritanceType){
+    for (const inheritanceType of model.inheritanceType) {
         const entity = getEntityFromRef(inheritanceType.entity.ref, entityMap);
-        if (inheritanceType.type == "disjointed"){
+        if (inheritanceType.type == "disjointed") {
             entity.setInheritanceType("disjoint");
-        }else if(inheritanceType.type == "overlapping"){
+        } else if (inheritanceType.type == "overlapping") {
             entity.setInheritanceType("overlapping");
-        }else {
+        } else {
             throw new Error("Unknown inheritance type: " + inheritanceType.type);
         }
     }
 
-    for (const multiRelationship of model.multirelation){
+    for (const multiRelationship of model.multirelation) {
         const connections: RelationshipConnection[] = [];
         const cardinalities = extractCardinalitiesFromCardinalityArray(multiRelationship.cardinality);
-        for (let i: number = 0; i < multiRelationship.entities.length; i++){
+        for (let i: number = 0; i < multiRelationship.entities.length; i++) {
             const entity = getEntityFromRef(multiRelationship.entities[i].ref, entityMap);
             const lower_cardinality = cardinalities[i].lower;
             const upper_cardinality = cardinalities[i].upper;
             const identifies = false; // TODO: should this be available in the language?
-            connections.push({entity, lower_cardinality, upper_cardinality, identifies});
+            connections.push({ entity, lower_cardinality, upper_cardinality, identifies });
         }
 
         const attributes = createAttributesForRelationship(multiRelationship.attributes);
@@ -219,19 +219,19 @@ function createAttributeFromLangiumAttribute(attribute: LangiumAttribute): Attri
                 is_derived = true;
                 break;
             case "Unique":
-            case "unique" :
+            case "unique":
                 is_unique = true;
                 break;
-            case "Nullable" :
-            case "nullable" :
+            case "Nullable":
+            case "nullable":
                 is_nullable = true;
                 break;
-            case "FK" :
-            case "fk" :
+            case "FK":
+            case "fk":
                 is_foreign_key = true;
                 break;
-            case "PK" :
-            case "pk" :
+            case "PK":
+            case "pk":
                 is_primary_key = true;
                 break;
             default:

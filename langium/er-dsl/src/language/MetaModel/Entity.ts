@@ -1,5 +1,5 @@
-import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
-
+import { Attribute, DataType, instantiateDataType } from "./Attribute.js";
+import { generateKeyword, getDataTypeString } from "../PlantUmlGeneration/plantuml-utils.js";
 
 export type InheritanceType = 'disjoint' | 'overlapping';
 
@@ -33,7 +33,7 @@ export class Entity {
                 const primaryDataType: DataType = instantiateDataType("serial");
                 pkAttr = new Attribute("id", primaryDataType, false, true);
                 this.attributes.unshift(pkAttr);
-            }else{
+            } else {
                 pkAttr.is_primary_key = true;
             }
         }
@@ -41,17 +41,18 @@ export class Entity {
         return pkAttr;
     }
 
-    public getAggregatedInheritanceType(): string{
+    public getAggregatedInheritanceType(): string {
         let result: string = ""
-            if (this.inheritanceType == "disjoint"){
-                result = "d";
-            }
-            if (this.inheritanceType == "overlapping"){
-                result = "o";
-            }
-        return result
+
+        if (this.inheritanceType == "disjoint") {
+            result = "d";
         }
-    
+        if (this.inheritanceType == "overlapping") {
+            result = "o";
+        }
+        return result
+    }
+
     public markAsWeak(): void {
         this.is_weak = true;
     }
@@ -72,11 +73,11 @@ export class Entity {
         // return this.simpleString();
     }
 
-    public toPlantUML(): string {
+    public generatePlantUMLRelations(): string {
         let result: string = "";
 
-        result = this.children.map(child => 
-            this.getAggregatedInheritanceType() 
+        result = this.children.map(child =>
+            this.getAggregatedInheritanceType()
                 ? `${child.name} ->- ${this.getAggregatedInheritanceType()} {${this.name}}`
                 : `${child.name} ->- ${this.name}`
         ).join('\n\n');
@@ -85,19 +86,17 @@ export class Entity {
     }
 
     public toPlantWithAttribute(
-        getDataTypeString: (attribute: Attribute) => string,
-        generateKeyword: (attribute: Attribute) => string
     ): string {
         let result: string = ""
         result = `entity ${this.name} ${this.is_weak ? '<<weak>>' : ''} {
             ${this.attributes.map((attribute) => {
-                return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
-            }).join('\n')}
+            return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+        }).join('\n')}
         }`;
 
         return result;
     }
-            
+
     private simpleString(): string {
 
         let result: string = `Entity: ${this.name}\n`;
