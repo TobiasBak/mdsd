@@ -15,39 +15,15 @@ export function generateUMLDiagram(model: InstantiatedOutput): string {
     const fileNode = expandToNode`
         @startchen
 
-        ${entities.map((entity) => {
-            return `entity ${entity.name} ${entity.is_weak ? '<<weak>>' : ''} {
-                ${entity.attributes.map((attribute) => {
-                    return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
-                }).join('\n')}
-            }`;
-        }).join('\n\n')}
+        ${entities.map(entity => entity.toPlantWithAttribute(getDataTypeString, generateKeyword)).join('\n\n')}
 
-        ${relationships.map((relationship) => {
-            return `relationship "${relationship.name}" as ${relationship.name} ${relationship.is_weak ? "<<identifying>>" : ""} {
-                ${relationship.attributes.map((attribute) => {
-                    return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
-                }).join('\n')}
-            }`;
-        }).join('\n\n')}
+        ${relationships.map(relationship => relationship.toPlantUMLWithAttribute(getDataTypeString, generateKeyword)).join('\n\n')}
 
-        ${relationships.map((relationship) => {
-            return `
-                ${relationship.name} -${getCardinality(relationship.side_a)}- ${relationship.side_a.entity.name} \n
-                ${relationship.name} -${getCardinality(relationship.side_b)}- ${relationship.side_b.entity.name}
-            `;
-        }).join('\n\n')}
+        ${relationships.map(relationship => relationship.toPlantUMLCardinality()).join('\n\n')}
 
+        ${entities.map(entity => entity.toPlantUML()).join('\n\n')}
         
-        ${entities.flatMap(entity => 
-            entity.children.map(child => 
-                entity.getAggregatedInheritanceType() 
-                ?`${child.name} ->- ${entity.getAggregatedInheritanceType()} {${entity.name}}`
-                :`${child.name} ->- ${entity.name}`
-            )
-        ).join('\n\n')}
-        
-        ${multiRelationships}
+        ${multiRelationships.map((relationship) => {relationship.toPlantUML()})}
         
         @endchen
     `.appendNewLineIfNotEmpty();
@@ -90,19 +66,6 @@ function getDataTypeString(attribute: Attribute): string {
     return `${attribute.datatype?.name}`;
 }
 
-function getCardinality(side: RelationshipConnection): string {
-    if (side.lower_cardinality == side.upper_cardinality){
-        return `${convertAsteriskToN(side.lower_cardinality)}`;
-    }else {
-        return `(${convertAsteriskToN(side.lower_cardinality)},${convertAsteriskToN(side.upper_cardinality)})`;
-    }
-}
 
-function convertAsteriskToN(cardinality: number | "*"): string | number {
-    if (cardinality == "*"){
-        return "n";
-    }
-    return cardinality;
-}
 
 

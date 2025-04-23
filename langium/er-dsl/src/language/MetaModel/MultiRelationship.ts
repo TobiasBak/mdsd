@@ -53,7 +53,7 @@ export class MultiRelationship {
     }
 
     public toString(): string {
-        return this.toPlantUML();
+        return this.simpleString();
     }
     
     //parse cardinality * -> N 
@@ -64,13 +64,10 @@ export class MultiRelationship {
         return cardinality.toString();
     }
 
-    toPlantUML(): string {
+    public toPlantUML(): string {
         let result: string = '';
 
-        
-        result += `relationship "${this.name}" as ${this.identifier} { 
-        }
-        \n`
+        result += `relationship "${this.name}" as ${this.identifier} { }\n`
 
         for (const connection of this.connections) {
             const { entity, lower_cardinality, upper_cardinality, identifies } = connection;

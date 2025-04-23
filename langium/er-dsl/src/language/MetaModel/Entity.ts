@@ -41,7 +41,6 @@ export class Entity {
         return pkAttr;
     }
 
-
     public getAggregatedInheritanceType(): string{
         let result: string = ""
             if (this.inheritanceType == "disjoint"){
@@ -53,8 +52,6 @@ export class Entity {
         return result
         }
     
-
-
     public markAsWeak(): void {
         this.is_weak = true;
     }
@@ -75,6 +72,32 @@ export class Entity {
         // return this.simpleString();
     }
 
+    public toPlantUML(): string {
+        let result: string = "";
+
+        result = this.children.map(child => 
+            this.getAggregatedInheritanceType() 
+                ? `${child.name} ->- ${this.getAggregatedInheritanceType()} {${this.name}}`
+                : `${child.name} ->- ${this.name}`
+        ).join('\n\n');
+
+        return result;
+    }
+
+    public toPlantWithAttribute(
+        getDataTypeString: (attribute: Attribute) => string,
+        generateKeyword: (attribute: Attribute) => string
+    ): string {
+        let result: string = ""
+        result = `entity ${this.name} ${this.is_weak ? '<<weak>>' : ''} {
+            ${this.attributes.map((attribute) => {
+                return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+            }).join('\n')}
+        }`;
+
+        return result;
+    }
+            
     private simpleString(): string {
 
         let result: string = `Entity: ${this.name}\n`;
@@ -100,20 +123,4 @@ export class Entity {
 
         return out;
     }
-
-    // private toPuml(): string {
-    //     const indent = '  '.repeat(0);
-    //     let result = `${indent}entity ${this.name} {\n`;
-    //     for (const attr of this.attributes) {
-    //         result += `${indent}  ${attr.name}:\n`;
-    //     }
-    //     result += `${indent}}\n`;
-
-    //     if (this.parent) {
-    //         result += `${indent}${this.name} -|> ${this.parent.name} : extends\n`;
-    //         result += this.parent.toPuml();
-    //     }
-
-    //     return result;
-    // }
 }

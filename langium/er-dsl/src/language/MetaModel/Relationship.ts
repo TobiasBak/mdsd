@@ -30,6 +30,26 @@ export class Relationship extends MultiRelationship {
         return this.simpleString();
     }
 
+    public toPlantUMLWithAttribute(
+        getDataTypeString: (attribute: RelationshipAttribute) => string,
+        generateKeyword: (attribute: RelationshipAttribute) => string
+    ): string {
+        let result: string = "";
+        result = `relationship "${this.name}" as ${this.name} ${this.is_weak ? "<<identifying>>" : ""} {
+            ${this.attributes.map((attribute) => {
+                return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+            }).join('\n')}
+        }`;
+
+        return result;
+    }
+
+    public toPlantUMLCardinality(): string {
+        let sideA = `${this.name} -${getCardinality(this.side_a)}- ${this.side_a.entity.name}`;
+        let sideB = `${this.name} -${getCardinality(this.side_b)}- ${this.side_b.entity.name}`;
+        return `${sideA}\n${sideB}`;
+    }
+
     override simpleString(): string {
         let result: string = '';
         const { entity: entityA } = this.side_a;
@@ -43,12 +63,28 @@ export class Relationship extends MultiRelationship {
     }
 }
 
+function getCardinality(side: RelationshipConnection): string {
+    if (side.lower_cardinality == side.upper_cardinality){
+        return `${convertAsteriskToN(side.lower_cardinality)}`;
+    }else {
+        return `(${convertAsteriskToN(side.lower_cardinality)},${convertAsteriskToN(side.upper_cardinality)})`;
+    }
+}
+
+function convertAsteriskToN(cardinality: number | "*"): string | number {
+    if (cardinality == "*"){
+        return "n";
+    }
+    return cardinality;
+}
+
 /**
  * Returns true if the cardinality is singular. If strict is true, it will only return true if the cardinality is exactly 1.
  * When strict is false, it will return true if the cardinality is 0 or 1.
  * @param cardinality The input cardinality to check
  * @param strict If true, the cardinality must be exactly 1 to return true
  */
+
 export function cardinalityIsSingular(cardinality: Cardinality, strict: boolean = true): boolean {
     if(strict){
         return cardinality == 1;
