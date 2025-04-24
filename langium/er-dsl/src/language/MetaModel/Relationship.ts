@@ -1,5 +1,6 @@
-import {MultiRelationship, RelationshipConnection, side, Cardinality} from "./MultiRelationship.js";
-import {RelationshipAttribute} from "./RelationshipAttribute.js";
+import { MultiRelationship, RelationshipConnection, side, Cardinality } from "./MultiRelationship.js";
+import { RelationshipAttribute } from "./RelationshipAttribute.js";
+import { getDataTypeString, generateKeyword } from "../PlantUmlGeneration/plantuml-utils.js";
 
 export class Relationship extends MultiRelationship {
     public side_a: RelationshipConnection;
@@ -12,9 +13,9 @@ export class Relationship extends MultiRelationship {
     }
 
     public hasRangedCardinality(side: side): boolean {
-        if (side == "a"){
+        if (side == "a") {
             return this.side_a.lower_cardinality != this.side_a.upper_cardinality;
-        }else if (side == "b"){
+        } else if (side == "b") {
             return this.side_b.lower_cardinality != this.side_b.upper_cardinality;
         }
         throw Error("Wrong side argument provided: " + side);
@@ -30,6 +31,24 @@ export class Relationship extends MultiRelationship {
         return this.simpleString();
     }
 
+    public toPlantUMLWithAttribute(): string {
+        let result: string = "";
+        
+        result = `relationship "${this.name}" as ${this.name} ${this.is_weak ? "<<identifying>>" : ""} {
+            ${this.attributes.map((attribute) => {
+            return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+        }).join('\n')}
+        }`;
+
+        return result;
+    }
+
+    public toPlantUMLCardinality(): string {
+        let sideA = `${this.name} -${getCardinality(this.side_a)}- ${this.side_a.entity.name}`;
+        let sideB = `${this.name} -${getCardinality(this.side_b)}- ${this.side_b.entity.name}`;
+        return `${sideA}\n${sideB}`;
+    }
+
     override simpleString(): string {
         let result: string = '';
         const { entity: entityA } = this.side_a;
@@ -43,17 +62,33 @@ export class Relationship extends MultiRelationship {
     }
 }
 
+function getCardinality(side: RelationshipConnection): string {
+    if (side.lower_cardinality == side.upper_cardinality) {
+        return `${convertAsteriskToN(side.lower_cardinality)}`;
+    } else {
+        return `(${convertAsteriskToN(side.lower_cardinality)},${convertAsteriskToN(side.upper_cardinality)})`;
+    }
+}
+
+function convertAsteriskToN(cardinality: number | "*"): string | number {
+    if (cardinality == "*") {
+        return "n";
+    }
+    return cardinality;
+}
+
 /**
  * Returns true if the cardinality is singular. If strict is true, it will only return true if the cardinality is exactly 1.
  * When strict is false, it will return true if the cardinality is 0 or 1.
  * @param cardinality The input cardinality to check
  * @param strict If true, the cardinality must be exactly 1 to return true
  */
+
 export function cardinalityIsSingular(cardinality: Cardinality, strict: boolean = true): boolean {
-    if(strict){
+    if (strict) {
         return cardinality == 1;
     }
-    if (cardinality == "*"){
+    if (cardinality == "*") {
         return false;
     }
     return cardinality <= 1;

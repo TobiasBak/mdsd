@@ -1,5 +1,6 @@
-import {Attribute, DataType, instantiateDataType} from "./Attribute.js";
-import {ForeignPKAttribute} from "./ForeignPKAttribute.js";
+import { Attribute, DataType, instantiateDataType } from "./Attribute.js";
+import { generateKeyword, getDataTypeString } from "../PlantUmlGeneration/plantuml-utils.js";
+import { ForeignPKAttribute } from "./ForeignPKAttribute.js";
 
 
 export type InheritanceType = 'disjoint' | 'overlapping';
@@ -53,7 +54,7 @@ export class Entity {
                 const primaryDataType: DataType = instantiateDataType("serial");
                 pkAttr = new Attribute("id", primaryDataType, false, true);
                 this.attributes.unshift(pkAttr);
-            }else{
+            } else {
                 pkAttr.is_primary_key = true;
             }
         }
@@ -61,6 +62,17 @@ export class Entity {
         return pkAttr;
     }
 
+    public getAggregatedInheritanceType(): string {
+        let result: string = ""
+
+        if (this.inheritanceType == "disjoint") {
+            result = "d";
+        }
+        if (this.inheritanceType == "overlapping") {
+            result = "o";
+        }
+        return result
+    }
 
     public markAsWeak(): void {
         this.is_weak = true;
@@ -80,6 +92,30 @@ export class Entity {
     public toString(): string {
         return this.allStringInfo();
         // return this.simpleString();
+    }
+
+    public generatePlantUMLRelations(): string {
+        let result: string = "";
+
+        result = this.children.map(child =>
+            this.getAggregatedInheritanceType()
+                ? `${child.name} ->- ${this.getAggregatedInheritanceType()} {${this.name}}`
+                : `${child.name} ->- ${this.name}`
+        ).join('\n\n');
+
+        return result;
+    }
+
+    public toPlantWithAttribute(
+    ): string {
+        let result: string = ""
+        result = `entity ${this.name} ${this.is_weak ? '<<weak>>' : ''} {
+            ${this.attributes.map((attribute) => {
+            return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
+        }).join('\n')}
+        }`;
+
+        return result;
     }
 
     private simpleString(): string {
@@ -107,20 +143,4 @@ export class Entity {
 
         return out;
     }
-
-    // private toPuml(): string {
-    //     const indent = '  '.repeat(0);
-    //     let result = `${indent}entity ${this.name} {\n`;
-    //     for (const attr of this.attributes) {
-    //         result += `${indent}  ${attr.name}:\n`;
-    //     }
-    //     result += `${indent}}\n`;
-
-    //     if (this.parent) {
-    //         result += `${indent}${this.name} -|> ${this.parent.name} : extends\n`;
-    //         result += this.parent.toPuml();
-    //     }
-
-    //     return result;
-    // }
 }
