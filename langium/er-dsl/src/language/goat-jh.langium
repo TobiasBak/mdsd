@@ -63,24 +63,32 @@ RelationShipIdentifiers:
     ;
 
 // Left recursion
-Expression: Addition;
+interface Expression {
+    left: Expression;
+    operator: string;
+    right: Expression;
+    value: number;
+    expression: Expression;
+}
 
-Addition infers Expression:
-    Multiplication ({infer Addition.left=current} operator=('+' | '-') right=Multiplication)*;
+Exp returns Expression: Addition_Subtraction;
 
-Multiplication infers Expression:
-    Exponent ({infer Multiplication.left=current} operator=('*' | '/') right=Exponent)*;
+Addition_Subtraction returns Expression:
+    Multiplication_Division ({infer Addition.left=current} operator=('+' | '-') right=Multiplication_Division)*;
 
-Exponent infers Expression:
+Multiplication_Division returns Expression:
+    Exponent_Sqrt ({infer Multiplication.left=current} operator=('*' | '/') right=Exponent_Sqrt)*;
+
+Exponent_Sqrt returns Expression:
     Primary ({infer Exponent.left=current} operator=('^') right=Primary)* |
-    'sqrt''(' ({infer Unary} expression=Addition) ')' |
+    'sqrt''(' ({infer Unary} expression=Exp) ')' |
     Primary;
 
-Primary infers Expression:
-    '(' Addition ')'|
+Primary returns Expression:
+    '(' Exp ')'|
     ({infer Integer}value=INT);    
 
-TYPES: (type="char" "(" value=Expression ")")? | (type="varchar" "(" value=Expression ")")? | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float")?;
+TYPES: (type="char" "(" value=Exp ")")? | (type="varchar" "(" value=Exp ")")? | type=("bigint" | "boolean" | "bool" | "char" | "varchar" | "date" | "int" | "real" | "smallint" | "text" | "uuid" | "time" | "timestamp" | "float")?;
 
 
 // MAKE TERMINALS GO IN ORDER OF HOW SPECIFIC THEY ARE. 

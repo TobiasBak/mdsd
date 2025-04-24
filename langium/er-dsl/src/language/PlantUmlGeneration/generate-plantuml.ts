@@ -33,9 +33,3 @@ export function generateUMLDiagram(model: InstantiatedOutput): string {
 
     return fileContent;
 }
-
-
-
-
-
-
