@@ -33,7 +33,7 @@ export class Relationship extends MultiRelationship {
 
     public toPlantUMLWithAttribute(): string {
         let result: string = "";
-        
+
         result = `relationship "${this.name}" as ${this.name} ${this.is_weak ? "<<identifying>>" : ""} {
             ${this.attributes.map((attribute) => {
             return `${attribute.name} : ${getDataTypeString(attribute)} ${generateKeyword(attribute)}`;
@@ -70,7 +70,7 @@ function getCardinality(side: RelationshipConnection): string {
     }
 }
 
-function convertAsteriskToN(cardinality: number | "*"): string | number {
+function convertAsteriskToN(cardinality: Cardinality | "*"): string | number {
     if (cardinality == "*") {
         return "n";
     }
@@ -83,7 +83,6 @@ function convertAsteriskToN(cardinality: number | "*"): string | number {
  * @param cardinality The input cardinality to check
  * @param strict If true, the cardinality must be exactly 1 to return true
  */
-
 export function cardinalityIsSingular(cardinality: Cardinality, strict: boolean = true): boolean {
     if (strict) {
         return cardinality == 1;

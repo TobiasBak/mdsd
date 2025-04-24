@@ -57,14 +57,11 @@ export class MultiRelationship {
     }
 
     //parse cardinality * -> N 
-    private aggregateCardinality(cardinality: Cardinality): string {
+    private aggregateCardinality(cardinality: string | number): string{
         if (cardinality == "*") {
             return "N";
         }
-        if(typeof cardinality === "number") {
             return cardinality.toString();
-        }
-        throw new Error(`Invalid cardinality value: ${cardinality}`);
     }
 
     public toPlantUML(): string {
@@ -77,7 +74,7 @@ export class MultiRelationship {
             const range = `${lower_cardinality}..${upper_cardinality}`;
             let cardinality = lower_cardinality === upper_cardinality ? lower_cardinality : range;
 
-            result += `\n${entity.name} \-${this.aggregateCardinality(cardinality as Cardinality)}\- ${this.identifier}`;
+            result += `\n${entity.name} \-${this.aggregateCardinality(cardinality)}\- ${this.identifier}`;
         }
 
         return result
@@ -87,7 +84,7 @@ export class MultiRelationship {
         let result: string = '';
 
         const { entity: entityA } = this.connections[0];
-        const { entity: entityB } = this.connections[1];
+            const { entity: entityB } = this.connections[1];
 
         const multiplicityA = `${this.connections[0].lower_cardinality}..${this.connections[0].upper_cardinality}`;
         const multiplicityB = `${this.connections[1].lower_cardinality}..${this.connections[1].upper_cardinality}`;

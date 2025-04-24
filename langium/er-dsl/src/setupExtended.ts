@@ -100,7 +100,7 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
     // PlantUML generation
     client.onNotification('browser/DocumentChange', (resp) => {
         const umltext = resp.content;
-        console.log('Received UML text: ', umltext);
+        // console.log('Received UML text: ', umltext);
         let encoded = plantumlEncoder.encode(umltext);
         const imgUrl = `http://plantuml.thorj.dk/img/${encoded}`;
         

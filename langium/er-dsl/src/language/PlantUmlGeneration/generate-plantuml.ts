@@ -11,6 +11,7 @@ export function generateUMLDiagram(model: InstantiatedOutput): string {
     const relationships: Relationship[] = model.relationships;
     const multiRelationships: MultiRelationship[] = model.multiRelationships;
 
+
     // Todo: Change the way relationships are identified, so that it says as "id" instead
     const fileNode = expandToNode`
         @startchen
@@ -33,9 +34,3 @@ export function generateUMLDiagram(model: InstantiatedOutput): string {
 
     return fileContent;
 }
-
-
-
-
-
-
