@@ -55,7 +55,7 @@ B()
 C()
 
 C, A inherits from B
-//B inherits from A
+B inherits from A
 
 Inheritance from B is disjointed
 

@@ -1,28 +1,25 @@
-```mermaid
-kanban
-    column1[TODO]
-        task9[Validation + syntaxttingeling efter senere lectures]@{assigned: Noone}
-        task7[**Requirements:** Create a left recursion problem and solve it]@{assigned: Noone}
-    column2[Underway]
-        task5[**Generation:** Generating the plantuml files to feed the plantuml live server]@{assigned: RASSERN}
-        task6[**Generation:** Generate SQL code in a .sql file]@{assigned: THOR}
-        task1[**Webserver:** Simple frontend, with editable textarea saved in a .JH file]@{assigned: Kevin & Tobib}
-        task8[**Webserver:** Forwarding error messages in syntax to frontend?]@{assigned: Kevin & Tobib}
-        task2[**Webserver:** Possibly getting syntax + highlighting like vscode?]@{assigned: Kevin & Tobib}
-    column3[PR]
-    column4[Done]
-        task3[**Plantuml:** Liveserver, where we can send file to and recieve a png of the diagram]@{assigned: Kevin & Tobib}
-        task4[**Generation:** Creating OOP structure of Entities, relations, etc in the generation.ts file]@{assigned: THOR & RASSERN}
-
-
-
-```
-
 ## Housekeeping
 Before we are done we should change the option `noUnusedLocals` back to `true` in `tsconfig.json`.
 
 
-# Validation tasks:     
+# Thor - Individual
+## Validation
+1. Check that you cannot specify inheritance type a second time.
+2. Check if inheritancetype is declared for occurrences of inheritance with more than 1 child.
+3. Inheritance with only one child, must not be able to define disjoint or overlapping.
+- Ensure no circular inheritance.
+- Ensure no duplicate attributes defined in children (Miguel thinks this is very interesting).
+
+
+## Testing
+Choose selected features from above to test.
+
+## Notes
+Write down something about why validation and not scoping.
+What is scoping truly used for, and why is it not validation?
+
+# The others
+## Validation tasks:     
 **TOBIAS:**
 1. Check that attributes only has one key
 2. Check that keywords are not defined twice (i.e. (PK Derived derived age))
@@ -46,7 +43,7 @@ Before we are done we should change the option `noUnusedLocals` back to `true` i
 3. Check for self-inheritance, this is not allowed.
 
 
-# Scoping tasks:       
+## Scoping tasks:       
 **Rasmus:** Make it possible to write: "<entity> requires <attribute> <boolean_operator> equation
 
 **Thor:** 
@@ -58,7 +55,7 @@ Before we are done we should change the option `noUnusedLocals` back to `true` i
 **TOBIAS:** Make it possible to remove an inherited attribute from an entity: "remove attribute <attribute> from <entity>
 
 
-# Testing tasks:
+## Testing tasks:
 Each individual tests the features they implement for scoping and validation.
 
 
