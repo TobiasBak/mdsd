@@ -53,7 +53,7 @@ export class ThorValidator {
         this.parentsWithInheritanceType = new Set()
         this.entitiesParticipatingInCircularInheritance = new SetWithContentEquality((entity: Entity) => entity.name);
         this.parents = new MapWithContentEquality((entity: Entity) => entity.name);
-        
+
         const entitiesWithSpecifiedInheritanceTypes: Set<Entity> = new Set();
         const childCounts: Map<Entity, number> = new Map();
         const inheritanceTypeForEntity: Map<Entity, InheritanceType> = new Map();
