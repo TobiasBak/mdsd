@@ -7,7 +7,7 @@ import { createGoatJhServices } from "../../src/language/goat-jh-module.js";
 import { Model, isModel } from "../../src/language/generated/ast.js";
 
 let services: ReturnType<typeof createGoatJhServices>;
-let parse:    ReturnType<typeof parseHelper<Model>>;
+let parse: ReturnType<typeof parseHelper<Model>>;
 let document: LangiumDocument<Model> | undefined;
 
 beforeAll(async () => {
@@ -20,10 +20,10 @@ beforeAll(async () => {
 });
 
 describe('Validating', () => {
-  
+
     test('check no errors', async () => {
         document = await parse(`
-            person Langium
+            Student(PK id varchar)
         `);
 
         expect(
@@ -35,21 +35,60 @@ describe('Validating', () => {
         ).toHaveLength(0);
     });
 
-    test('check capital letter validation', async () => {
-        document = await parse(`
-            person langium
-        `);
+    // test('check capital letter validation', async () => {
+    //     document = await parse(`
+    //         person (pk id)
+    //     `);
 
-        expect(
-            checkDocumentValid(document) || document?.diagnostics?.map(diagnosticToString)?.join('\n')
-        ).toEqual(
-            // 'expect.stringContaining()' makes our test robust against future additions of further validation rules
-            expect.stringContaining(s`
-                [1:19..1:26]: Person name should start with a capital.
-            `)
+    //     const diagnostics = checkDocumentValid(document) || document?.diagnostics?.map(diagnosticToString)?.join('\n') || '';
+    //     expect(diagnostics).toEqual(
+    //         expect.stringContaining(s`
+    //     [1:19..1:26]: Person name should start with a capital.
+    // `)
+    //     );
+    // });
+
+    test('check child only has one parent', async () => {
+        document = await parse(`
+        Person (pk id)
+        Employee (pk id)
+        Superhuman (pk id)
+        Person inherits from Employee
+        Person inherits from Superhuman
+    `);
+
+        const diagnostics = checkDocumentValid(document) || document?.diagnostics?.map(diagnosticToString)?.join('\n') || '';
+        expect(diagnostics).toContain("Entity 'Person' has multiple parents ('Employee', 'Superhuman')");
+    });
+
+    test('check cross inheritance', async () => {
+        document = await parse (`
+            A(pk id) 
+            B(pk id)
+            C(pk id)
+            D(pk id)
+
+            A inherits from B
+            B inherits from D
+            D inherits from C
+            C inherits from A
+        `);
+        const diagnostics = checkDocumentValid(document) || document?.diagnostics?.map(diagnosticToString)?.join('\n') || '';
+        expect(diagnostics).toContain(
+            "Inheritance cycle detected: A -> B -> D -> C -> A"
+        ); 
+    });
+
+    test('check self inheritance', async () => {
+        document = await parse(`
+            Person (pk id)
+            Person inherits from Person
+        `);
+        const diagnostics = checkDocumentValid(document) || document?.diagnostics?.map(diagnosticToString)?.join('\n') || '';
+        expect(diagnostics).toContain(
+            "Inheritance cycle detected: Person -> Person"
         );
     });
-});
 
 function checkDocumentValid(document: LangiumDocument): string | undefined {
     return document.parseResult.parserErrors.length && s`
@@ -63,4 +102,4 @@ function checkDocumentValid(document: LangiumDocument): string | undefined {
 
 function diagnosticToString(d: Diagnostic) {
     return `[${d.range.start.line}:${d.range.start.character}..${d.range.end.line}:${d.range.end.character}]: ${d.message}`;
-}
+}})

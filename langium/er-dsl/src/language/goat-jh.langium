@@ -7,7 +7,8 @@ entry Model:
     relationship+=Relationship | 
     multirelation+=MultiRelationShip | 
     inheritance+=Inheritance | 
-    inheritanceType+=InheritanceType 
+    inheritanceType+=InheritanceType |
+    requiresStatements+=RequiresStatement
     )*;
 
 Entity:
@@ -33,6 +34,10 @@ Relationship:
     ('(' (attributes+=Attribute (',' attributes+=Attribute)*)? ')' )?
     EOL*
     ;
+
+RequiresStatement:
+    entity=[Entity:ID] 'requires' attribute=[Attribute:ID] booleanOperator=BOOLEAN_OPERATOR equation=Exp EOL*
+;
 
 MultiRelationShip:
     entities+=[Entity:ID] (('-') entities+=[Entity:ID])*
@@ -114,3 +119,5 @@ hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 //hidden terminal NL: /[\r\n]+/;
+
+terminal BOOLEAN_OPERATOR: '==' | '!=' | '<' | '>' | '<=' | '>=';

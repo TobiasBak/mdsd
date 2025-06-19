@@ -31,7 +31,7 @@ export class MultiRelationship {
         this.attributes = attributes;
 
         this.entityMap = new Map();
-        for (const connection of connections){
+        for (const connection of connections) {
             this.entityMap.set(connection.entity, connection);
         }
     }
@@ -40,15 +40,15 @@ export class MultiRelationship {
         this.is_weak = true;
 
         const applicableConnection = this.entityMap.get(entity);
-        if (applicableConnection){
+        if (applicableConnection) {
             applicableConnection.identifies = true;
             entity.markAsWeak()
-        }else {
+        } else {
             throw Error(`Entity ${entity.name} is not part of the relationship ${this.name}. It has: ${this.connections.map(connection => connection.entity.name).join(", ")}`);
         }
     }
 
-    public sqlName(): string{
+    public sqlName(): string {
         return this.name.replaceAll(" ", "_").toLowerCase();
     }
 
@@ -56,11 +56,35 @@ export class MultiRelationship {
         return this.simpleString();
     }
 
+    //parse cardinality * -> N 
+    private aggregateCardinality(cardinality: string | number): string{
+        if (cardinality == "*") {
+            return "N";
+        }
+            return cardinality.toString();
+    }
 
-    simpleString(): string { // TODO: fix this for multi relationships
+    public toPlantUML(): string {
         let result: string = '';
+
+        result += `relationship "${this.name}" as ${this.identifier} { \n }\n`
+
+        for (const connection of this.connections) {
+            const { entity, lower_cardinality, upper_cardinality, identifies } = connection;
+            const range = `${lower_cardinality}..${upper_cardinality}`;
+            let cardinality = lower_cardinality === upper_cardinality ? lower_cardinality : range;
+
+            result += `\n${entity.name} \-${this.aggregateCardinality(cardinality)}\- ${this.identifier}`;
+        }
+
+        return result
+    }
+
+    public simpleString(): string { // TODO: fix this for multi relationships
+        let result: string = '';
+
         const { entity: entityA } = this.connections[0];
-        const { entity: entityB } = this.connections[1];
+            const { entity: entityB } = this.connections[1];
 
         const multiplicityA = `${this.connections[0].lower_cardinality}..${this.connections[0].upper_cardinality}`;
         const multiplicityB = `${this.connections[1].lower_cardinality}..${this.connections[1].upper_cardinality}`;
